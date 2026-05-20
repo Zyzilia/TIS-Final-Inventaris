@@ -6,9 +6,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use OpenApi\Attributes as OA;
 
 class ProxyController extends Controller
 {
+    #[OA\Get(
+        path: '/api/proxy/provinces',
+        operationId: 'getProvinces',
+        summary: 'Ambil daftar provinsi dari RajaOngkir',
+        security: [['bearerAuth' => []]],
+        tags: ['Logistics Gateway'],
+        responses: [
+            new OA\Response(response: 200, description: 'Berhasil mengambil daftar provinsi'),
+            new OA\Response(response: 500, description: 'Kesalahan Server')
+        ]
+    )]
     public function getProvinces()
     {
         try {
@@ -38,6 +50,20 @@ class ProxyController extends Controller
         }
     }
 
+    #[OA\Get(
+        path: '/api/proxy/cities',
+        operationId: 'getCities',
+        summary: 'Ambil daftar kota/kabupaten berdasarkan provinsi',
+        security: [['bearerAuth' => []]],
+        tags: ['Logistics Gateway'],
+        parameters: [
+            new OA\Parameter(name: 'province', in: 'query', required: true, description: 'ID Provinsi', schema: new OA\Schema(type: 'integer'))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Berhasil mengambil daftar kota'),
+            new OA\Response(response: 500, description: 'Kesalahan Server')
+        ]
+    )]
     public function getCities(Request $request)
     {
         try {
@@ -71,6 +97,27 @@ class ProxyController extends Controller
         }
     }
 
+    #[OA\Post(
+        path: '/api/proxy/shipping-cost',
+        operationId: 'checkShipping',
+        summary: 'Cek ongkir via RajaOngkir Proxy',
+        security: [['bearerAuth' => []]],
+        tags: ['Logistics Gateway'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'origin', type: 'string', example: '501'),
+                    new OA\Property(property: 'destination', type: 'string', example: '114'),
+                    new OA\Property(property: 'weight', type: 'integer', example: 1000),
+                    new OA\Property(property: 'courier', type: 'string', example: 'jne')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Success')
+        ]
+    )]
     public function checkCost(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -115,6 +162,54 @@ class ProxyController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan kalkulasi pada server gateway',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    #[OA\Get(
+        path: '/api/proxy/currency-rates',
+        operationId: 'getCurrencyRates',
+        summary: 'Ambil kurs mata uang asing (USD ke IDR) untuk import parts',
+        security: [['bearerAuth' => []]],
+        tags: ['Finance Gateway'],
+        responses: [
+            new OA\Response(response: 200, description: 'Berhasil mengambil kurs'),
+            new OA\Response(response: 500, description: 'Kesalahan Server')
+        ]
+    )]
+    public function getCurrencyRates()
+    {
+        try {
+            // Menggunakan API gratis open.er-api.com
+            $response = Http::get('https://open.er-api.com/v6/latest/USD');
+
+            if ($response->failed()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengambil data kurs mata uang',
+                ], $response->status());
+            }
+
+            $data = $response->json();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Kurs berhasil diambil',
+                'data' => [
+                    'base' => $data['base_code'],
+                    'rates' => [
+                        'IDR' => $data['rates']['IDR'] ?? null,
+                        'SGD' => $data['rates']['SGD'] ?? null,
+                        'CNY' => $data['rates']['CNY'] ?? null,
+                    ],
+                    'last_updated' => $data['time_last_update_utc'],
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server currency gateway',
                 'error' => $e->getMessage(),
             ], 500);
         }

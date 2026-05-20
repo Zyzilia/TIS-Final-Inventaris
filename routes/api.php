@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ProxyController;
+use App\Http\Controllers\Api\ActivityController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'auth'], function () {
@@ -27,11 +28,13 @@ Route::middleware('auth:api')->group(function () {
     Route::middleware('role:admin,staff')->group(function () {
         Route::get('items', [ItemController::class, 'index']);
         Route::get('items/{id}', [ItemController::class, 'show']);
+        Route::get('activities', [ActivityController::class, 'index']);
 
         Route::prefix('proxy')->group(function () {
             Route::get('provinces', [ProxyController::class, 'getProvinces']);
             Route::get('cities', [ProxyController::class, 'getCities']);
             Route::post('shipping-cost', [ProxyController::class, 'checkCost']);
+            Route::get('currency-rates', [ProxyController::class, 'getCurrencyRates']);
         });
     });
 });

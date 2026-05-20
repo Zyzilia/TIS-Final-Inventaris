@@ -12,10 +12,12 @@ class Item extends Model
     protected $fillable = [
         'category_id',
         'supplier_id',
+        'brand',
         'name',
         'sku',
         'stock',
-        'price',
+        'price_usd',
+        'profit_margin',
     ];
 
     public function category()

@@ -17,7 +17,8 @@ return new class extends Migration {
             $table->string('name');
             $table->string('sku')->unique();
             $table->integer('stock')->default(0);
-            $table->decimal('price', 15, 2);
+            $table->decimal('price_usd', 10, 2);
+            $table->decimal('profit_margin', 5, 2)->default(10.00); // 10% default
             $table->timestamps();
         });
     }
