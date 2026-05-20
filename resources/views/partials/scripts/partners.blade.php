@@ -5,7 +5,8 @@ const mockSuppliers = [
     { name: 'Corsair Memory', address: 'Fremont, California, USA', phone: '+1-555-0143', category: 'RAM & PSU' },
     { name: 'Samsung Corp', address: 'Suwon, South Korea', phone: '+82-2-1234-5678', category: 'Storage' },
     { name: 'ASUS Global', address: 'Beitou District, Taipei, Taiwan', phone: '+886-2-8143-7575', category: 'Motherboard' },
-    { name: 'NZXT Corp', address: 'Los Angeles, California, USA', phone: '+1-555-0177', category: 'Case & Cooling' }
+    { name: 'NZXT Corp', address: 'Los Angeles, California, USA', phone: '+1-555-0177', category: 'Case & Cooling' },
+    { name: 'Intel Corp', address: 'Santa Clara, California, USA', phone: '+1-555-0150', category: 'CPU' }
 ];
 const mockCustomers = [
     { name: 'Quantum PC Shop', type: 'Wholesale Distributor', phone: '+62-812-3456-7890', location: 'Jakarta, Indonesia' },
@@ -37,54 +38,77 @@ function loadPartners() {
     container.innerHTML = '';
     
     if (activePartnerTab === 'suppliers') {
-        let html = `
-            <table class="w-full text-left border-collapse text-sm">
-                <thead>
-                    <tr class="text-gray-400 text-xs border-b border-gray-100 pb-4">
-                        <th class="pb-4 font-medium px-2">Supplier Name</th>
-                        <th class="pb-4 font-medium">Provided Category</th>
-                        <th class="pb-4 font-medium">Phone</th>
-                        <th class="pb-4 font-medium">Address</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        mockSuppliers.forEach(sup => {
-            html += `
-                <tr class="border-b border-gray-50 hover:bg-gray-50 transition text-xs">
-                    <td class="py-4 px-2 font-semibold text-gray-800">${sup.name}</td>
-                    <td class="py-4"><span class="px-2.5 py-1 rounded bg-violet-50 text-accent font-medium border border-violet-100">${sup.category}</span></td>
-                    <td class="py-4 text-gray-600 font-mono">${sup.phone}</td>
-                    <td class="py-4 text-gray-500">${sup.address}</td>
-                </tr>
-            `;
-        });
-        html += '</tbody></table>';
-        container.innerHTML = html;
+        container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fa-solid fa-circle-notch fa-spin text-xl text-accent font-medium"></i> Memuat data supplier...</div>`;
+        axios.get('/api/suppliers')
+            .then(res => {
+                const suppliers = res.data.data;
+                renderSuppliersList(suppliers);
+            })
+            .catch(err => {
+                console.error(err);
+                renderSuppliersList(mockSuppliers);
+            });
     } else {
-        let html = `
-            <table class="w-full text-left border-collapse text-sm">
-                <thead>
-                    <tr class="text-gray-400 text-xs border-b border-gray-100 pb-4">
-                        <th class="pb-4 font-medium px-2">Customer Name</th>
-                        <th class="pb-4 font-medium">Type</th>
-                        <th class="pb-4 font-medium">Phone</th>
-                        <th class="pb-4 font-medium">Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        mockCustomers.forEach(cust => {
-            html += `
-                <tr class="border-b border-gray-50 hover:bg-gray-50 transition text-xs">
-                    <td class="py-4 px-2 font-semibold text-gray-800">${cust.name}</td>
-                    <td class="py-4"><span class="px-2.5 py-1 rounded bg-blue-50 text-blue-600 font-medium border border-blue-100">${cust.type}</span></td>
-                    <td class="py-4 text-gray-600 font-mono">${cust.phone}</td>
-                    <td class="py-4 text-gray-500">${cust.location}</td>
-                </tr>
-            `;
-        });
-        html += '</tbody></table>';
-        container.innerHTML = html;
+        renderCustomersList(mockCustomers);
     }
+}
+
+function renderSuppliersList(suppliersList) {
+    const container = document.getElementById('partnerContainer');
+    if (!container) return;
+
+    let html = `
+        <table class="w-full text-left border-collapse text-sm">
+            <thead>
+                <tr class="text-gray-400 text-xs border-b border-gray-100 pb-4">
+                    <th class="pb-4 font-medium px-2">Supplier Name</th>
+                    <th class="pb-4 font-medium">Provided Category</th>
+                    <th class="pb-4 font-medium">Phone</th>
+                    <th class="pb-4 font-medium">Address</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    suppliersList.forEach(sup => {
+        html += `
+            <tr class="border-b border-gray-50 hover:bg-gray-50 transition text-xs">
+                <td class="py-4 px-2 font-semibold text-gray-800">${sup.name}</td>
+                <td class="py-4"><span class="px-2.5 py-1 rounded bg-violet-50 text-accent font-medium border border-violet-100">${sup.category}</span></td>
+                <td class="py-4 text-gray-600 font-mono">${sup.phone}</td>
+                <td class="py-4 text-gray-500">${sup.address}</td>
+            </tr>
+        `;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+function renderCustomersList(customersList) {
+    const container = document.getElementById('partnerContainer');
+    if (!container) return;
+
+    let html = `
+        <table class="w-full text-left border-collapse text-sm">
+            <thead>
+                <tr class="text-gray-400 text-xs border-b border-gray-100 pb-4">
+                    <th class="pb-4 font-medium px-2">Customer Name</th>
+                    <th class="pb-4 font-medium">Type</th>
+                    <th class="pb-4 font-medium">Phone</th>
+                    <th class="pb-4 font-medium">Location</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    customersList.forEach(cust => {
+        html += `
+            <tr class="border-b border-gray-50 hover:bg-gray-50 transition text-xs">
+                <td class="py-4 px-2 font-semibold text-gray-800">${cust.name}</td>
+                <td class="py-4"><span class="px-2.5 py-1 rounded bg-blue-50 text-blue-600 font-medium border border-blue-100">${cust.type}</span></td>
+                <td class="py-4 text-gray-600 font-mono">${cust.phone}</td>
+                <td class="py-4 text-gray-500">${cust.location}</td>
+            </tr>
+        `;
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
 }

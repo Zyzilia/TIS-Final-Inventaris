@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ProxyController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'auth'], function () {
@@ -33,6 +34,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('transactions', [TransactionController::class, 'index']);
         Route::post('transactions', [TransactionController::class, 'store']);
         Route::put('transactions/{id}', [TransactionController::class, 'update']);
+        Route::get('suppliers', [SupplierController::class, 'index']);
 
         Route::prefix('proxy')->group(function () {
             Route::get('provinces', [ProxyController::class, 'getProvinces']);
