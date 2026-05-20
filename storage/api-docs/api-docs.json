@@ -74,6 +74,50 @@
                 }
             }
         },
+        "/api/auth/profile": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Dapatkan profil user saat ini",
+                "operationId": "getUserProfile",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil profil"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user dan invalidasi token",
+                "operationId": "logoutUser",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil logout"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/items": {
             "get": {
                 "tags": [
@@ -116,9 +160,13 @@
                                         "type": "string",
                                         "example": "LAP-001"
                                     },
-                                    "price": {
+                                    "price_usd": {
                                         "type": "number",
-                                        "example": 15000000
+                                        "example": 1000
+                                    },
+                                    "profit_margin": {
+                                        "type": "number",
+                                        "example": 10
                                     },
                                     "stock": {
                                         "type": "integer",
@@ -136,6 +184,198 @@
                     },
                     "403": {
                         "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/items/{id}": {
+            "get": {
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Ambil detail satu barang",
+                "operationId": "getItemById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Barang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil data"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Update data barang (Admin Only)",
+                "operationId": "updateItem",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Barang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Laptop Asus ROG"
+                                    },
+                                    "sku": {
+                                        "type": "string",
+                                        "example": "LAP-001"
+                                    },
+                                    "price_usd": {
+                                        "type": "number",
+                                        "example": 1100
+                                    },
+                                    "profit_margin": {
+                                        "type": "number",
+                                        "example": 12
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 12
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Berhasil diupdate"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Hapus data barang (Admin Only)",
+                "operationId": "deleteItem",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Barang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Barang tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/proxy/provinces": {
+            "get": {
+                "tags": [
+                    "Logistics Gateway"
+                ],
+                "summary": "Ambil daftar provinsi dari RajaOngkir",
+                "operationId": "getProvinces",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil daftar provinsi"
+                    },
+                    "500": {
+                        "description": "Kesalahan Server"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/proxy/cities": {
+            "get": {
+                "tags": [
+                    "Logistics Gateway"
+                ],
+                "summary": "Ambil daftar kota/kabupaten berdasarkan provinsi",
+                "operationId": "getCities",
+                "parameters": [
+                    {
+                        "name": "province",
+                        "in": "query",
+                        "description": "ID Provinsi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil daftar kota"
+                    },
+                    "500": {
+                        "description": "Kesalahan Server"
                     }
                 },
                 "security": [
@@ -191,6 +431,28 @@
                     }
                 ]
             }
+        },
+        "/api/proxy/currency-rates": {
+            "get": {
+                "tags": [
+                    "Finance Gateway"
+                ],
+                "summary": "Ambil kurs mata uang asing (USD ke IDR) untuk import parts",
+                "operationId": "getCurrencyRates",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil kurs"
+                    },
+                    "500": {
+                        "description": "Kesalahan Server"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -214,6 +476,10 @@
         {
             "name": "Logistics Gateway",
             "description": "Logistics Gateway"
+        },
+        {
+            "name": "Finance Gateway",
+            "description": "Finance Gateway"
         }
     ]
 }

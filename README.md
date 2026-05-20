@@ -37,55 +37,56 @@ Aplikasi ini cocok digunakan untuk:
 ## ✨ Fitur Utama
 
 ### 1. **Authentication & Authorization**
-- Login dengan JWT Token
-- Profile management
-- Logout dengan token invalidation
-- Role-based access control (Admin, Staff Gudang)
+- Login aman menggunakan JWT Token
+- Manajemen profil user aktif
+- Logout terintegrasi dengan invalidasi token JWT
+- Role-based Access Control (RBAC) untuk Admin dan Staff Gudang
 
-### 2. **Manajemen Item/Barang**
-- Membuat item baru (Admin only)
-- Melihat daftar semua item (Admin & Staff)
-- Detail item spesifik (Admin & Staff)
-- Update item termasuk stok (Admin only)
-- Hapus item (Admin only)
+### 2. **Manajemen Item/Barang (PC Parts System)**
+- CRUD barang (Admin only) & view barang (Admin & Staff)
+- **Merk / Seri Komponen Kustom**: Input brand khusus untuk CPU (Ryzen, Intel), GPU (Nvidia, AMD, Intel Arc), RAM (Samsung, Crucial, Corsair), dll.
+- **Konverter Kurs Otomatis & Margin**: Dukungan harga berbasis USD dengan penyesuaian margin profit dan konversi nilai ke IDR.
 
 ### 3. **Kategori & Supplier**
-- Relasi item ke kategori
-- Relasi item ke supplier
-- Tracking asal barang
+- Relasi item ke kategori komponen
+- Relasi item ke supplier eksternal
+- Tracking lokasi gudang dan asal barang
 
-### 4. **Integrasi Logistik (Proxy)**
-- Ambil data provinsi
-- Ambil data kota berdasarkan provinsi
-- Cek ongkos pengiriman dari external API
+### 4. **Integrasi Logistik (Proxy Gateway)**
+- Get data provinsi dari API RajaOngkir
+- Get data kota berdasarkan provinsi
+- Kalkulasi estimasi ongkos kirim berdasarkan berat (gram) dan jenis kurir (JNE, POS, TIKI)
 
-### 5. **Stock Transactions**
-- Pencatatan otomatis untuk setiap transaksi
-- Tracking history perubahan stok
-- Audit trail untuk compliance
+### 5. **Audit Trail & Activity Logs**
+- Pencatatan otomatis log aktivitas sistem (pembelian, penambahan stok, edit item, dll.)
+- Widget riwayat aktivitas real-time pada dashboard
+
+### 6. **Interactive Sales Analytics & Settings**
+- Chart penjualan interaktif yang terhubung langsung antara grafik bulanan (Sales Activity) dengan distribusi persentase wilayah (Doughnut Chart).
+- Pengaturan Kurs & Margin Manual untuk bypass/override API eksternal secara fleksibel.
 
 ---
 
 ## 🛠 Stack Teknologi
 
 ### Backend
-- **PHP 8.2+** - Bahasa pemrograman
-- **Laravel 12** - Web framework
-- **MySQL/PostgreSQL** - Database (dapat dikonfigurasi)
-- **JWT-Auth 2.3** - JWT Authentication
-- **Laravel Sanctum 4.0** - API token authentication
+- **PHP 8.2+** - Bahasa pemrograman utama
+- **Laravel 12** - Web framework PHP
+- **MySQL/PostgreSQL** - Database
+- **JWT-Auth 2.3** - JSON Web Token Authentication
+- **L5-Swagger (Swagger UI)** - Dokumentasi API interaktif
 
 ### Frontend
-- **JavaScript (ES6+)** - Scripting
-- **Tailwind CSS 4.0** - Utility-first CSS framework
-- **Vite 7.0** - Build tool & development server
-- **Axios 1.11** - HTTP client
+- **JavaScript (ES6+)** - Interaksi & AJAX client
+- **Tailwind CSS 4.0** - Styling framework
+- **Chart.js** - Rendering grafik interaktif
+- **FontAwesome 6** - Kumpulan ikon grafis
+- **Axios 1.11** - HTTP client untuk AJAX requests
 
 ### Development Tools
 - **Composer** - PHP Dependency Manager
-- **npm** - JavaScript Package Manager
-- **Laravel Sail** - Docker development environment
-- **PHPUnit 11.5** - Testing framework
+- **npm** - Node Package Manager
+- **PHPUnit 11.5** - Automated testing suite
 - **Laravel Pint** - Code style formatter
 
 ---
@@ -243,6 +244,12 @@ npm run dev
 
 ## 📡 API Documentation
 
+### Interactive Swagger UI (Recommended)
+Seluruh REST API endpoint telah terdokumentasi menggunakan Swagger Open-API. Anda dapat mengakses dashboard interaktif untuk mencoba langsung endpoint (termasuk autorisasi bearer token):
+```
+URL: http://localhost:8000/api/documentation
+```
+
 ### Base URL
 ```
 http://localhost:8000/api
@@ -307,17 +314,30 @@ Roles: admin, staff
 
 Response (200):
 {
+  "success": true,
+  "message": "Daftar barang berhasil diambil",
   "data": [
     {
       "id": 1,
-      "name": "Laptop Dell XPS 13",
-      "sku": "DELL-XPS-13-001",
-      "stock": 5,
-      "price": 12000000,
       "category_id": 1,
       "supplier_id": 1,
-      "category": { "id": 1, "name": "Electronics" },
-      "supplier": { "id": 1, "name": "PT. Teknologi Maju" }
+      "brand": "Nvidia GeForce",
+      "name": "NVIDIA RTX 4090 GPU",
+      "sku": "GPU-4090-FE",
+      "stock": 15,
+      "price_usd": "1700.00",
+      "profit_margin": "10.00",
+      "created_at": "2026-05-20T10:42:42.000000Z",
+      "updated_at": "2026-05-20T10:42:42.000000Z",
+      "price": 29920000,
+      "category": {
+        "id": 1,
+        "name": "GPU"
+      },
+      "supplier": {
+        "id": 1,
+        "name": "NVIDIA Corp"
+      }
     }
   ]
 }
@@ -331,15 +351,30 @@ Roles: admin, staff
 
 Response (200):
 {
-  "id": 1,
-  "name": "Laptop Dell XPS 13",
-  "sku": "DELL-XPS-13-001",
-  "stock": 5,
-  "price": 12000000,
-  "category_id": 1,
-  "supplier_id": 1,
-  "category": { "id": 1, "name": "Electronics" },
-  "supplier": { "id": 1, "name": "PT. Teknologi Maju" }
+  "success": true,
+  "message": "Detail barang berhasil diambil",
+  "data": {
+    "id": 1,
+    "category_id": 1,
+    "supplier_id": 1,
+    "brand": "Nvidia GeForce",
+    "name": "NVIDIA RTX 4090 GPU",
+    "sku": "GPU-4090-FE",
+    "stock": 15,
+    "price_usd": "1700.00",
+    "profit_margin": "10.00",
+    "created_at": "2026-05-20T10:42:42.000000Z",
+    "updated_at": "2026-05-20T10:42:42.000000Z",
+    "price": 29920000,
+    "category": {
+      "id": 1,
+      "name": "GPU"
+    },
+    "supplier": {
+      "id": 1,
+      "name": "NVIDIA Corp"
+    }
+  }
 }
 ```
 
@@ -351,16 +386,34 @@ Roles: admin (ONLY)
 Content-Type: application/json
 
 {
-  "name": "Laptop Dell XPS 13",
-  "sku": "DELL-XPS-13-001",
-  "stock": 5,
-  "price": 12000000,
   "category_id": 1,
-  "supplier_id": 1
+  "supplier_id": 1,
+  "brand": "Nvidia GeForce",
+  "name": "NVIDIA RTX 4090 GPU",
+  "sku": "GPU-4090-FE",
+  "stock": 15,
+  "price_usd": 1700,
+  "profit_margin": 10
 }
 
 Response (201):
-{ ... item data ... }
+{
+  "success": true,
+  "message": "Barang berhasil ditambahkan",
+  "data": {
+    "category_id": 1,
+    "supplier_id": 1,
+    "brand": "Nvidia GeForce",
+    "name": "NVIDIA RTX 4090 GPU",
+    "sku": "GPU-4090-FE",
+    "stock": 15,
+    "price_usd": 1700,
+    "profit_margin": 10,
+    "updated_at": "2026-05-20T10:42:42.000000Z",
+    "created_at": "2026-05-20T10:42:42.000000Z",
+    "id": 1
+  }
+}
 ```
 
 #### Update Item
@@ -371,12 +424,29 @@ Roles: admin (ONLY)
 Content-Type: application/json
 
 {
-  "stock": 10,
-  "price": 11500000
+  "stock": 20,
+  "price_usd": 1650,
+  "profit_margin": 12
 }
 
 Response (200):
-{ ... updated item data ... }
+{
+  "success": true,
+  "message": "Barang berhasil diperbarui",
+  "data": {
+    "id": 1,
+    "category_id": 1,
+    "supplier_id": 1,
+    "brand": "Nvidia GeForce",
+    "name": "NVIDIA RTX 4090 GPU",
+    "sku": "GPU-4090-FE",
+    "stock": 20,
+    "price_usd": 1650,
+    "profit_margin": 12,
+    "created_at": "2026-05-20T10:42:42.000000Z",
+    "updated_at": "2026-05-20T10:45:00.000000Z"
+  }
+}
 ```
 
 #### Delete Item
@@ -387,11 +457,12 @@ Roles: admin (ONLY)
 
 Response (200):
 {
-  "message": "Item deleted successfully"
+  "success": true,
+  "message": "Barang berhasil dihapus"
 }
 ```
 
-### Proxy Endpoints (Logistik Integration)
+### Proxy Endpoints (Logistik & Finance Integration)
 
 #### Get Provinces
 ```http
@@ -401,28 +472,28 @@ Roles: admin, staff
 
 Response (200):
 {
-  "rajaongkir": {
-    "results": [
-      { "province_id": "1", "province": "Bali" },
-      { "province_id": "2", "province": "Bangka Belitung" }
-    ]
-  }
+  "success": true,
+  "message": "Daftar provinsi berhasil diambil",
+  "data": [
+    { "province_id": "1", "province": "Bali" },
+    { "province_id": "2", "province": "Bangka Belitung" }
+  ]
 }
 ```
 
 #### Get Cities by Province
 ```http
-GET /proxy/cities?province_id=1
+GET /proxy/cities?province=1
 Authorization: Bearer {access_token}
 Roles: admin, staff
 
 Response (200):
 {
-  "rajaongkir": {
-    "results": [
-      { "city_id": "1", "province_id": "1", "city_name": "Denpasar", "type": "Kota" }
-    ]
-  }
+  "success": true,
+  "message": "Daftar kota berhasil diambil",
+  "data": [
+    { "city_id": "1", "province_id": "1", "city_name": "Denpasar", "type": "Kota" }
+  ]
 }
 ```
 
@@ -434,29 +505,79 @@ Roles: admin, staff
 Content-Type: application/json
 
 {
-  "origin": 501,
-  "destination": 114,
+  "origin": "501",
+  "destination": "114",
   "weight": 1000,
   "courier": "jne"
 }
 
 Response (200):
 {
-  "rajaongkir": {
-    "results": [
-      {
-        "code": "jne",
-        "name": "Jalur Nugraha Ekakurir (JNE)",
-        "costs": [
-          {
-            "service": "OKE",
-            "description": "Ongkir Kilat Khusus",
-            "cost": [{ "value": 6000, "etd": "1-2" }]
-          }
-        ]
-      }
-    ]
+  "success": true,
+  "message": "Kalkulasi biaya pengiriman berhasil",
+  "data": [
+    {
+      "code": "jne",
+      "name": "Jalur Nugraha Ekakurir (JNE)",
+      "costs": [
+        {
+          "service": "OKE",
+          "description": "Ongkos Kilat Khusus",
+          "cost": [{ "value": 6000, "etd": "1-2" }]
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### Get Currency Exchange Rates (USD to IDR/SGD/CNY)
+```http
+GET /proxy/currency-rates
+Authorization: Bearer {access_token}
+Roles: admin, staff
+
+Response (200):
+{
+  "success": true,
+  "message": "Kurs berhasil diambil",
+  "data": {
+    "base": "USD",
+    "rates": {
+      "IDR": 16250,
+      "SGD": 1.34,
+      "CNY": 7.24
+    },
+    "last_updated": "Wed, 20 May 2026 11:32:45 UTC"
   }
+}
+```
+
+### Audit Trail & Activities Endpoints
+
+#### Get Audit Trail Logs
+```http
+GET /activities
+Authorization: Bearer {access_token}
+Roles: admin, staff
+
+Response (200):
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "user_name": "Super Admin",
+      "action": "Create",
+      "description": "Super Admin created NVIDIA RTX 4090 GPU",
+      "item_type": "gpu",
+      "amount": "+15 Units",
+      "order_id": null,
+      "created_at": "2026-05-20T10:42:42.000000Z",
+      "updated_at": "2026-05-20T10:42:42.000000Z"
+    }
+  ]
 }
 ```
 
@@ -509,15 +630,17 @@ CREATE TABLE suppliers (
 CREATE TABLE items (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   category_id BIGINT NOT NULL,
-  supplier_id BIGINT NOT NULL,
+  supplier_id BIGINT NULL,
+  brand VARCHAR(255) NULL,
   name VARCHAR(255) NOT NULL,
   sku VARCHAR(100) UNIQUE NOT NULL,
   stock INT DEFAULT 0,
-  price DECIMAL(12,2) NOT NULL,
+  price_usd DECIMAL(10,2) NOT NULL,
+  profit_margin DECIMAL(5,2) DEFAULT 10.00,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  FOREIGN KEY (category_id) REFERENCES categories(id),
-  FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+  FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+  FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL
 );
 ```
 
@@ -532,7 +655,24 @@ CREATE TABLE stock_transactions (
   notes TEXT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  FOREIGN KEY (item_id) REFERENCES items(id)
+  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
+);
+```
+
+### Tabel Activity Logs
+```sql
+CREATE TABLE activity_logs (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id BIGINT NULL,
+  user_name VARCHAR(255) NULL,
+  action VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  item_type VARCHAR(255) NULL,
+  amount VARCHAR(255) NULL,
+  order_id VARCHAR(255) NULL,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 ```
 

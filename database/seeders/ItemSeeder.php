@@ -16,7 +16,8 @@ class ItemSeeder extends Seeder
             ['name' => 'Corsair Memory', 'address' => 'Fremont, California, USA', 'phone' => '+1-555-0143'],
             ['name' => 'Samsung Corp', 'address' => 'Suwon, South Korea', 'phone' => '+82-2-1234-5678'],
             ['name' => 'ASUS Global', 'address' => 'Beitou District, Taipei, Taiwan', 'phone' => '+886-2-8143-7575'],
-            ['name' => 'NZXT Corp', 'address' => 'Los Angeles, California, USA', 'phone' => '+1-555-0177']
+            ['name' => 'NZXT Corp', 'address' => 'Los Angeles, California, USA', 'phone' => '+1-555-0177'],
+            ['name' => 'Intel Corp', 'address' => 'Santa Clara, California, USA', 'phone' => '+1-555-0150']
         ];
 
         foreach ($suppliers as $sup) {

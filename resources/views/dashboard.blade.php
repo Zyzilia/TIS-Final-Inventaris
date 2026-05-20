@@ -31,6 +31,7 @@
         @include('partials.scripts.navigation')
         @include('partials.scripts.items')
         @include('partials.scripts.activities')
+        @include('partials.scripts.transactions')
         @include('partials.scripts.partners')
         @include('partials.scripts.finance')
         @include('partials.scripts.charts')

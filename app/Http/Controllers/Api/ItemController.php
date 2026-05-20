@@ -118,6 +118,15 @@ class ItemController extends Controller
             'order_id' => '#' . str_pad($item->id, 6, '0', STR_PAD_LEFT),
         ]);
 
+        // Create Stock Transaction
+        \App\Models\StockTransaction::create([
+            'item_id' => $item->id,
+            'user_id' => $user?->id ?? 1,
+            'type' => 'in',
+            'quantity' => $item->stock,
+            'notes' => 'Pemasukan barang baru via panel admin',
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Barang berhasil ditambahkan ke inventaris',
@@ -241,6 +250,15 @@ class ItemController extends Controller
                 'item_type' => $itemType,
                 'amount' => $diffStr,
                 'order_id' => '#' . str_pad($item->id, 6, '0', STR_PAD_LEFT),
+            ]);
+
+            // Create Stock Transaction
+            \App\Models\StockTransaction::create([
+                'item_id' => $item->id,
+                'user_id' => $user?->id ?? 1,
+                'type' => $diff > 0 ? 'in' : 'out',
+                'quantity' => abs($diff),
+                'notes' => $diff > 0 ? 'Restock barang via panel edit' : 'Pengurangan barang/audit via panel edit',
             ]);
         } else {
             ActivityLog::create([

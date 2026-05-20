@@ -245,3 +245,53 @@
         </form>
     </div>
 </div>
+
+<!-- Transaction Modal -->
+<div id="txModal" class="fixed inset-0 bg-gray-900/50 z-[60] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="font-semibold text-gray-800 text-lg">Add Stock Transaction</h3>
+            <button onclick="closeTxModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="txForm" onsubmit="submitTransaction(event)" class="p-6 flex flex-col gap-4">
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Select Item / Component</label>
+                <select id="txItemSelect" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent bg-white">
+                    <!-- Loaded dynamically -->
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                    <select id="txTypeSelect" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent bg-white">
+                        <option value="in">Inbound (Restock)</option>
+                        <option value="out">Outbound (Sale)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                    <input type="number" id="txQuantityInput" required min="1" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                <select id="txStatusSelect" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent bg-white">
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Notes / Description</label>
+                <textarea id="txNotesInput" rows="2" placeholder="e.g. Distributed to Surabaya, Supplier restock etc." class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent"></textarea>
+            </div>
+
+            <div class="mt-4 flex gap-3 justify-end">
+                <button type="button" onclick="closeTxModal()" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-accent hover:bg-violet-600 rounded-lg transition">Save Transaction</button>
+            </div>
+        </form>
+    </div>
+</div>
