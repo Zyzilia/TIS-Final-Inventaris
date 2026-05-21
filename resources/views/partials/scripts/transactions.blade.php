@@ -20,13 +20,23 @@ function filterTransactions() {
 
     const searchQuery = document.getElementById('txSearch').value.toLowerCase();
     const filterType = document.getElementById('txFilter').value.toLowerCase();
+    const statusFilter = document.getElementById('txStatusFilter') ? document.getElementById('txStatusFilter').value.toLowerCase() : '';
+    const dateFilter = document.getElementById('txDateFilter').value; // YYYY-MM-DD
 
     const filtered = currentTransactions.filter(tx => {
         const itemName = tx.item ? tx.item.name.toLowerCase() : '';
         const itemSku = tx.item ? tx.item.sku.toLowerCase() : '';
         const matchesSearch = itemName.includes(searchQuery) || itemSku.includes(searchQuery);
         const matchesType = !filterType || tx.type.toLowerCase() === filterType;
-        return matchesSearch && matchesType;
+        const matchesStatus = !statusFilter || tx.status.toLowerCase() === statusFilter;
+        
+        let matchesDate = true;
+        if (dateFilter) {
+            const txDate = tx.created_at.substring(0, 10);
+            matchesDate = (txDate === dateFilter);
+        }
+        
+        return matchesSearch && matchesType && matchesStatus && matchesDate;
     });
 
     tbody.innerHTML = '';

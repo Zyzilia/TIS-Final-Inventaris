@@ -6,7 +6,7 @@ const mockSuppliers = [
     { name: 'Samsung Corp', address: 'Suwon, South Korea', phone: '+82-2-1234-5678', category: 'Storage' },
     { name: 'ASUS Global', address: 'Beitou District, Taipei, Taiwan', phone: '+886-2-8143-7575', category: 'Motherboard' },
     { name: 'NZXT Corp', address: 'Los Angeles, California, USA', phone: '+1-555-0177', category: 'Case & Cooling' },
-    { name: 'Intel Corp', address: 'Santa Clara, California, USA', phone: '+1-555-0150', category: 'CPU' }
+    { name: 'Intel Corp', address: 'Santa Clara, California, USA', phone: '+1-555-0150', category: 'CPU & GPU' }
 ];
 const mockCustomers = [
     { name: 'Quantum PC Shop', type: 'Wholesale Distributor', phone: '+62-812-3456-7890', location: 'Jakarta, Indonesia' },
@@ -29,6 +29,14 @@ function switchPartnerTab(tabName) {
         tabCust.className = 'pb-3 border-b-2 border-accent font-semibold text-accent';
         tabSup.className = 'pb-3 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-800';
     }
+
+    const addBtn = document.getElementById('addPartnerBtn');
+    if (addBtn) {
+        addBtn.innerHTML = tabName === 'suppliers' 
+            ? '<i class="fa-solid fa-plus text-xs"></i> Add Supplier'
+            : '<i class="fa-solid fa-plus text-xs"></i> Add Customer';
+    }
+
     loadPartners();
 }
 
@@ -49,7 +57,16 @@ function loadPartners() {
                 renderSuppliersList(mockSuppliers);
             });
     } else {
-        renderCustomersList(mockCustomers);
+        container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fa-solid fa-circle-notch fa-spin text-xl text-accent font-medium"></i> Memuat data customer...</div>`;
+        axios.get('/api/customers')
+            .then(res => {
+                const customers = res.data.data;
+                renderCustomersList(customers);
+            })
+            .catch(err => {
+                console.error(err);
+                renderCustomersList(mockCustomers);
+            });
     }
 }
 
@@ -111,4 +128,76 @@ function renderCustomersList(customersList) {
     });
     html += '</tbody></table>';
     container.innerHTML = html;
+}
+
+function openPartnerModal() {
+    const modal = document.getElementById('partnerModal');
+    if (!modal) return;
+
+    const title = document.getElementById('partnerModalTitle');
+    const nameLabel = document.getElementById('partnerNameLabel');
+    const locationLabel = document.getElementById('partnerLocationLabel');
+    const typeWrapper = document.getElementById('partnerTypeWrapper');
+
+    if (activePartnerTab === 'suppliers') {
+        title.textContent = 'Add New Supplier';
+        nameLabel.textContent = 'Supplier Name';
+        locationLabel.textContent = 'Address';
+        typeWrapper.classList.add('hidden');
+    } else {
+        title.textContent = 'Add New Customer';
+        nameLabel.textContent = 'Customer Name';
+        locationLabel.textContent = 'Location / City';
+        typeWrapper.classList.remove('hidden');
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closePartnerModal() {
+    const modal = document.getElementById('partnerModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.getElementById('partnerForm').reset();
+}
+
+async function submitPartner(event) {
+    event.preventDefault();
+
+    const name = document.getElementById('partnerNameInput').value;
+    const phone = document.getElementById('partnerPhoneInput').value;
+    const locationOrAddress = document.getElementById('partnerLocationInput').value;
+    
+    let url = '/api/suppliers';
+    let data = {
+        name: name,
+        phone: phone,
+        address: locationOrAddress
+    };
+
+    if (activePartnerTab === 'customers') {
+        const type = document.getElementById('partnerTypeSelect').value;
+        url = '/api/customers';
+        data = {
+            name: name,
+            type: type,
+            phone: phone,
+            location: locationOrAddress
+        };
+    }
+
+    try {
+        await axios.post(url, data);
+        alert(activePartnerTab === 'suppliers' ? 'Supplier berhasil ditambahkan!' : 'Customer berhasil ditambahkan!');
+        closePartnerModal();
+        loadPartners();
+    } catch (err) {
+        console.error(err);
+        const errMsg = err.response && err.response.data && err.response.data.message 
+            ? err.response.data.message 
+            : 'Gagal menyimpan partner';
+        alert(errMsg);
+    }
 }

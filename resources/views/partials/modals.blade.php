@@ -295,3 +295,42 @@
         </form>
     </div>
 </div>
+
+<!-- Partner Modal -->
+<div id="partnerModal" class="fixed inset-0 bg-gray-900/50 z-[60] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <h3 id="partnerModalTitle" class="font-semibold text-gray-800 text-lg">Add New Supplier</h3>
+            <button onclick="closePartnerModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="partnerForm" onsubmit="submitPartner(event)" class="p-6 flex flex-col gap-4">
+            <div>
+                <label id="partnerNameLabel" class="block text-xs font-medium text-gray-700 mb-1">Supplier Name</label>
+                <input type="text" id="partnerNameInput" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
+            </div>
+
+            <div id="partnerTypeWrapper">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Customer Type</label>
+                <select id="partnerTypeSelect" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent bg-white">
+                    <option value="Retail Store">Retail Store</option>
+                    <option value="Wholesale Distributor">Wholesale Distributor</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Phone</label>
+                <input type="text" id="partnerPhoneInput" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
+            </div>
+
+            <div>
+                <label id="partnerLocationLabel" class="block text-xs font-medium text-gray-700 mb-1">Address</label>
+                <input type="text" id="partnerLocationInput" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
+            </div>
+
+            <div class="mt-4 flex gap-3 justify-end">
+                <button type="button" onclick="closePartnerModal()" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Cancel</button>
+                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-accent hover:bg-violet-600 rounded-lg transition">Save Partner</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ItemSeeder::class,
             ActivityLogSeeder::class,
             StockTransactionSeeder::class,
+            CustomerSeeder::class,
         ]);
     }
 }

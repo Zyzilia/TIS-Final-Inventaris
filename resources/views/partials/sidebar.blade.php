@@ -9,7 +9,6 @@
             </button>
             <button onclick="switchView('transactions')" id="btn-nav-transactions" class="text-gray-400 hover:text-white w-full aspect-square rounded-xl flex justify-center items-center transition-colors relative transition-all duration-200">
                 <i class="fa-solid fa-box text-lg"></i>
-                <span class="absolute top-1 right-1 bg-accent text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-darknav">3</span>
             </button>
             <button onclick="switchView('categories')" id="btn-nav-categories" class="text-gray-400 hover:text-white w-full aspect-square flex justify-center items-center transition-colors rounded-xl transition-all duration-200"><i class="fa-solid fa-microchip text-lg"></i></button>
             <button onclick="switchView('finance')" id="btn-nav-finance" class="text-gray-400 hover:text-white w-full aspect-square flex justify-center items-center transition-colors rounded-xl transition-all duration-200"><i class="fa-solid fa-money-bill-wave text-lg"></i></button>

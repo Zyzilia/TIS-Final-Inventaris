@@ -19,10 +19,16 @@
                 <input type="text" id="txSearch" oninput="filterTransactions()" placeholder="Search by item name or SKU..." class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-accent">
             </div>
             <select id="txFilter" onchange="filterTransactions()" class="px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-accent">
-                <option value="">All Transactions</option>
+                <option value="">All Types</option>
                 <option value="IN">Inbound (Restock)</option>
                 <option value="OUT">Outbound (Sale)</option>
             </select>
+            <select id="txStatusFilter" onchange="filterTransactions()" class="px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-accent">
+                <option value="">All Statuses</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+            </select>
+            <input type="date" id="txDateFilter" onchange="filterTransactions()" class="px-4 py-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:border-accent" title="Filter by date">
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse text-sm">
