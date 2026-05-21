@@ -12,7 +12,6 @@
             </button>
             <button onclick="switchView('categories')" id="btn-nav-categories" class="text-gray-400 hover:text-white w-full aspect-square flex justify-center items-center transition-colors rounded-xl transition-all duration-200"><i class="fa-solid fa-microchip text-lg"></i></button>
             <button onclick="switchView('finance')" id="btn-nav-finance" class="text-gray-400 hover:text-white w-full aspect-square flex justify-center items-center transition-colors rounded-xl transition-all duration-200"><i class="fa-solid fa-money-bill-wave text-lg"></i></button>
-            <button onclick="openShippingModal()" class="text-gray-400 hover:text-white w-full aspect-square flex justify-center items-center transition-colors rounded-xl transition-all duration-200"><i class="fa-solid fa-truck-fast text-lg"></i></button>
             <button onclick="switchView('partners')" id="btn-nav-partners" class="text-gray-400 hover:text-white w-full aspect-square flex justify-center items-center transition-colors rounded-xl transition-all duration-200"><i class="fa-solid fa-users text-lg"></i></button>
         </nav>
     </div>

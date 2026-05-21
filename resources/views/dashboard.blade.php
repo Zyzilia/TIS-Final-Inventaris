@@ -35,7 +35,7 @@
         @include('partials.scripts.partners')
         @include('partials.scripts.finance')
         @include('partials.scripts.charts')
-        @include('partials.scripts.shipping')
+
         @include('partials.scripts.modals')
 
         function loadDashboardData() {

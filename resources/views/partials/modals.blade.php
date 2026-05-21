@@ -134,67 +134,6 @@
     </div>
 </div>
 
-<!-- Shipping Calculator Modal -->
-<div id="shippingModal" class="fixed inset-0 bg-gray-900/50 z-[80] hidden items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div class="bg-darknav px-6 py-5 flex justify-between items-center text-white shrink-0">
-            <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-truck-fast text-accent"></i> Shipping Calculator</h3>
-            <button onclick="closeShippingModal()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
-        </div>
-        
-        <div class="p-6 overflow-y-auto flex-1 flex flex-col gap-6">
-            <!-- Inputs -->
-            <div class="grid grid-cols-2 gap-6 bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                <div class="space-y-4">
-                    <h4 class="font-semibold text-gray-800 text-sm border-b border-gray-200 pb-2"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i> Origin</h4>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Province</label>
-                        <select id="originProvince" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-accent" onchange="loadCities('origin', this.value)"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">City</label>
-                        <select id="originCity" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-accent"></select>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <h4 class="font-semibold text-gray-800 text-sm border-b border-gray-200 pb-2"><i class="fa-solid fa-map-pin text-blue-500 mr-1"></i> Destination</h4>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Province</label>
-                        <select id="destProvince" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-accent" onchange="loadCities('dest', this.value)"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">City</label>
-                        <select id="destCity" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-accent"></select>
-                    </div>
-                </div>
-                <div class="col-span-2 grid grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Weight (grams)</label>
-                        <input type="number" id="shipWeight" value="1000" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Courier</label>
-                        <select id="shipCourier" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-accent">
-                            <option value="jne">JNE</option>
-                            <option value="pos">POS Indonesia</option>
-                            <option value="tiki">TIKI</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action -->
-            <button onclick="calculateShipping()" id="btnCalcShipping" class="w-full bg-accent text-white font-semibold py-3 rounded-xl hover:bg-violet-600 transition shadow-lg shadow-violet-500/30">
-                Calculate Cost
-            </button>
-
-            <!-- Results -->
-            <div id="shippingResults" class="hidden flex-col gap-3">
-                <!-- results go here -->
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Tooltip Element -->
 <div id="chartjs-tooltip" style="opacity: 0;">
@@ -264,7 +203,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Type</label>
-                    <select id="txTypeSelect" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent bg-white">
+                    <select id="txTypeSelect" required onchange="toggleTxShipping()" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent bg-white">
                         <option value="in">Inbound (Restock)</option>
                         <option value="out">Outbound (Sale)</option>
                     </select>
@@ -286,6 +225,45 @@
             <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">Notes / Description</label>
                 <textarea id="txNotesInput" rows="2" placeholder="e.g. Distributed to Surabaya, Supplier restock etc." class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent"></textarea>
+            </div>
+
+            <!-- Integrated Shipping Section (Hidden by default, shown for Outbound) -->
+            <div id="txShippingWrapper" class="hidden flex-col gap-3 border border-gray-200 rounded-xl p-4 bg-gray-50 mt-2">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-semibold text-gray-800 text-sm"><i class="fa-solid fa-truck-fast text-accent mr-1"></i> Shipping Calculator</h4>
+                    <span class="text-xs text-gray-500">Optional</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-medium text-gray-500 mb-1">Dest. Province</label>
+                        <select id="txDestProvince" class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-white focus:outline-none focus:border-accent" onchange="loadTxCities(this.value)"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium text-gray-500 mb-1">Dest. City</label>
+                        <select id="txDestCity" class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-white focus:outline-none focus:border-accent"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium text-gray-500 mb-1">Weight (grams)</label>
+                        <input type="number" id="txShipWeight" value="1000" class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs focus:outline-none focus:border-accent">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-medium text-gray-500 mb-1">Courier</label>
+                        <select id="txShipCourier" class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-white focus:outline-none focus:border-accent">
+                            <option value="jne">JNE</option>
+                            <option value="pos">POS</option>
+                            <option value="tiki">TIKI</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="button" onclick="calculateTxShipping()" id="btnCalcTxShipping" class="w-full bg-white border border-accent text-accent font-semibold py-1.5 rounded-md hover:bg-accent hover:text-white transition text-xs mt-1">
+                    Check Shipping Cost
+                </button>
+                
+                <div id="txShippingResults" class="hidden flex-col gap-2 max-h-32 overflow-y-auto mt-2">
+                    <!-- Results -->
+                </div>
             </div>
 
             <div class="mt-4 flex gap-3 justify-end">

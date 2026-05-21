@@ -178,3 +178,140 @@ async function toggleTransactionStatus(id, currentStatus) {
         alert(errMsg);
     }
 }
+
+// --- Integrated Shipping Functions ---
+
+function toggleTxShipping() {
+    const type = document.getElementById('txTypeSelect').value;
+    const wrapper = document.getElementById('txShippingWrapper');
+    
+    if (type === 'out') {
+        wrapper.classList.remove('hidden');
+        wrapper.classList.add('flex');
+        
+        // Load provinces if not loaded yet
+        const provSelect = document.getElementById('txDestProvince');
+        if (provSelect.options.length <= 1) {
+            loadTxProvinces();
+        }
+    } else {
+        wrapper.classList.add('hidden');
+        wrapper.classList.remove('flex');
+    }
+}
+
+async function loadTxProvinces() {
+    const provSelect = document.getElementById('txDestProvince');
+    try {
+        const res = await axios.get('/api/proxy/provinces');
+        let options = '<option value="">Select Province...</option>';
+        res.data.data.forEach(p => {
+            options += `<option value="${p.province_id}">${p.province}</option>`;
+        });
+        provSelect.innerHTML = options;
+    } catch (e) {
+        console.error('API Error:', e);
+        provSelect.innerHTML = '<option value="">Failed to load API Provinces</option>';
+        alert('Gagal mengambil data Provinsi dari API asli. Periksa API Key Anda.');
+    }
+}
+
+async function loadTxCities(provinceId) {
+    const citySelect = document.getElementById('txDestCity');
+    if (!provinceId) {
+        citySelect.innerHTML = '<option value="">Select City...</option>';
+        return;
+    }
+    try {
+        const res = await axios.get(`/api/proxy/cities?province=${provinceId}`);
+        let options = '<option value="">Select City...</option>';
+        res.data.data.forEach(c => {
+            options += `<option value="${c.city_id}">${c.type} ${c.city_name}</option>`;
+        });
+        citySelect.innerHTML = options;
+    } catch (e) {
+        console.error('API Error:', e);
+        citySelect.innerHTML = '<option value="">Failed to load API Cities</option>';
+        alert('Gagal mengambil data Kota dari API asli. Periksa API Key Anda.');
+    }
+}
+
+async function calculateTxShipping() {
+    const btn = document.getElementById('btnCalcTxShipping');
+    const resContainer = document.getElementById('txShippingResults');
+    
+    // Default origin to Jakarta Selatan (153)
+    const origin = "153"; 
+    
+    const dest = document.getElementById('txDestCity').value;
+    const weight = document.getElementById('txShipWeight').value;
+    const courier = document.getElementById('txShipCourier').value;
+    
+    if(!dest || !weight || !courier) {
+        alert("Please fill destination city, weight, and courier!");
+        return;
+    }
+    
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Loading...';
+    btn.disabled = true;
+    resContainer.classList.add('hidden');
+    
+    try {
+        const res = await axios.post('/api/proxy/shipping-cost', {
+            origin, destination: dest, weight, courier
+        });
+        
+        let html = '';
+        const results = res.data.data[0];
+        if (results && results.costs && results.costs.length > 0) {
+            results.costs.forEach(cost => {
+                const costData = cost.cost[0];
+                const costStr = Number(costData.value).toLocaleString('id-ID');
+                const serviceName = `${results.name} - ${cost.service}`;
+                html += `
+                <div class="border border-gray-200 rounded-lg p-2 flex justify-between items-center bg-white hover:border-accent transition cursor-pointer" onclick="selectTxShippingCost('${serviceName}', '${costStr}')">
+                    <div>
+                        <div class="font-bold text-gray-900 text-[10px]">${serviceName}</div>
+                        <div class="text-[9px] text-gray-500">${cost.description} (EST: ${costData.etd} Hari)</div>
+                    </div>
+                    <div class="text-xs font-bold text-accent">
+                        Rp ${costStr}
+                    </div>
+                </div>
+                `;
+            });
+        } else {
+            html += '<div class="text-gray-500 italic text-[10px] text-center py-2">No services available.</div>';
+        }
+        
+        resContainer.innerHTML = html;
+        resContainer.classList.remove('hidden');
+        resContainer.classList.add('flex');
+    } catch (e) {
+        console.error("API Error:", e);
+        resContainer.innerHTML = `<div class="text-red-500 text-[10px] text-center py-2">Gagal menghitung ongkir. API Key bermasalah atau limit habis.</div>`;
+        resContainer.classList.remove('hidden');
+        resContainer.classList.add('flex');
+        alert('Gagal mengambil tarif pengiriman dari API asli.');
+    } finally {
+        btn.innerHTML = 'Check Shipping Cost';
+        btn.disabled = false;
+    }
+}
+
+function selectTxShippingCost(serviceName, costStr) {
+    const notesInput = document.getElementById('txNotesInput');
+    const shipText = `[Shipping: ${serviceName} - Rp ${costStr}]`;
+    
+    if (notesInput.value) {
+        notesInput.value += `\n${shipText}`;
+    } else {
+        notesInput.value = shipText;
+    }
+    
+    // Highlight effect
+    notesInput.classList.add('ring-2', 'ring-accent', 'ring-offset-1');
+    setTimeout(() => {
+        notesInput.classList.remove('ring-2', 'ring-accent', 'ring-offset-1');
+    }, 1000);
+}

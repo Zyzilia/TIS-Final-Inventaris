@@ -7,31 +7,77 @@ const mockProvinces = [
     { province_id: "9", province: "Jawa Barat" },
     { province_id: "10", province: "Jawa Tengah" },
     { province_id: "11", province: "Jawa Timur" },
-    { province_id: "3", province: "Banten" }
+    { province_id: "5", province: "DI Yogyakarta" },
+    { province_id: "3", province: "Banten" },
+    { province_id: "1", province: "Bali" },
+    { province_id: "34", province: "Sumatera Utara" },
+    { province_id: "28", province: "Sulawesi Selatan" },
+    { province_id: "15", province: "Kalimantan Timur" }
 ];
 
 const mockCities = {
     "6": [
         { city_id: "153", city_name: "Jakarta Selatan", type: "Kota" },
         { city_id: "152", city_name: "Jakarta Pusat", type: "Kota" },
-        { city_id: "151", city_name: "Jakarta Barat", type: "Kota" }
+        { city_id: "151", city_name: "Jakarta Barat", type: "Kota" },
+        { city_id: "154", city_name: "Jakarta Timur", type: "Kota" },
+        { city_id: "155", city_name: "Jakarta Utara", type: "Kota" }
     ],
     "9": [
         { city_id: "23", city_name: "Bandung", type: "Kota" },
         { city_id: "54", city_name: "Bogor", type: "Kabupaten" },
-        { city_id: "115", city_name: "Depok", type: "Kota" }
+        { city_id: "115", city_name: "Depok", type: "Kota" },
+        { city_id: "55", city_name: "Bogor", type: "Kota" },
+        { city_id: "78", city_name: "Cimahi", type: "Kota" },
+        { city_id: "62", city_name: "Cirebon", type: "Kota" },
+        { city_id: "44", city_name: "Bekasi", type: "Kota" }
     ],
     "10": [
         { city_id: "399", city_name: "Semarang", type: "Kota" },
-        { city_id: "445", city_name: "Surakarta", type: "Kota" }
+        { city_id: "445", city_name: "Surakarta", type: "Kota" },
+        { city_id: "256", city_name: "Magelang", type: "Kota" },
+        { city_id: "344", city_name: "Pekalongan", type: "Kota" },
+        { city_id: "432", city_name: "Sukoharjo", type: "Kabupaten" }
     ],
     "11": [
         { city_id: "444", city_name: "Surabaya", type: "Kota" },
-        { city_id: "255", city_name: "Malang", type: "Kabupaten" }
+        { city_id: "255", city_name: "Malang", type: "Kabupaten" },
+        { city_id: "254", city_name: "Malang", type: "Kota" },
+        { city_id: "160", city_name: "Jember", type: "Kabupaten" },
+        { city_id: "419", city_name: "Sidoarjo", type: "Kabupaten" },
+        { city_id: "24", city_name: "Banyuwangi", type: "Kabupaten" }
+    ],
+    "5": [
+        { city_id: "501", city_name: "Yogyakarta", type: "Kota" },
+        { city_id: "39", city_name: "Bantul", type: "Kabupaten" },
+        { city_id: "418", city_name: "Sleman", type: "Kabupaten" },
+        { city_id: "135", city_name: "Gunung Kidul", type: "Kabupaten" }
     ],
     "3": [
         { city_id: "457", city_name: "Tangerang", type: "Kota" },
-        { city_id: "402", city_name: "Serang", type: "Kota" }
+        { city_id: "402", city_name: "Serang", type: "Kota" },
+        { city_id: "456", city_name: "Tangerang", type: "Kabupaten" },
+        { city_id: "458", city_name: "Tangerang Selatan", type: "Kota" }
+    ],
+    "1": [
+        { city_id: "114", city_name: "Denpasar", type: "Kota" },
+        { city_id: "17", city_name: "Badung", type: "Kabupaten" },
+        { city_id: "128", city_name: "Gianyar", type: "Kabupaten" }
+    ],
+    "34": [
+        { city_id: "278", city_name: "Medan", type: "Kota" },
+        { city_id: "106", city_name: "Deli Serdang", type: "Kabupaten" },
+        { city_id: "330", city_name: "Pematang Siantar", type: "Kota" }
+    ],
+    "28": [
+        { city_id: "253", city_name: "Makassar", type: "Kota" },
+        { city_id: "134", city_name: "Gowa", type: "Kabupaten" },
+        { city_id: "323", city_name: "Parepare", type: "Kota" }
+    ],
+    "15": [
+        { city_id: "42", city_name: "Balikpapan", type: "Kota" },
+        { city_id: "389", city_name: "Samarinda", type: "Kota" },
+        { city_id: "212", city_name: "Kutai Kartanegara", type: "Kabupaten" }
     ]
 };
 
