@@ -1,10 +1,10 @@
 // Dummy Data for PC Parts
 const pcPartsData = [
-    { name: 'NVIDIA RTX 4090 GPU', sku: 'GPU-4090-FE', stock: 15, price: 28000000, old_price: 30000000, items_sold: 45, type: 'gpu', category_id: 1, brand: 'Nvidia GeForce' },
-    { name: 'AMD Ryzen 9 7950X', sku: 'CPU-AMD-7950', stock: 32, price: 9500000, old_price: 10500000, items_sold: 120, type: 'cpu', category_id: 2, brand: 'AMD Ryzen' },
-    { name: 'Corsair Vengeance 32GB DDR5', sku: 'RAM-COR-32D5', stock: 85, price: 2100000, old_price: 2500000, items_sold: 310, type: 'ram', category_id: 3, brand: 'Corsair Vengeance' },
-    { name: 'Samsung 990 PRO 2TB NVMe', sku: 'SSD-SAM-2TB', stock: 120, price: 3200000, old_price: 3200000, items_sold: 450, type: 'ssd', category_id: 4, brand: 'Samsung PRO/EVO' },
-    { name: 'ASUS ROG Crosshair X670E', sku: 'MB-ASUS-X670', stock: 20, price: 8500000, old_price: 9000000, items_sold: 65, type: 'mb', category_id: 5, brand: 'ASUS ROG/TUF/Prime' }
+    { id: 1, name: 'NVIDIA RTX 4090 GPU', sku: 'GPU-4090-FE', stock: 15, price: 28000000, old_price: 30000000, items_sold: 45, type: 'gpu', category_id: 1, brand: 'Nvidia GeForce', weight: 2200 },
+    { id: 2, name: 'AMD Ryzen 9 7950X', sku: 'CPU-AMD-7950', stock: 32, price: 9500000, old_price: 10500000, items_sold: 120, type: 'cpu', category_id: 2, brand: 'AMD Ryzen', weight: 450 },
+    { id: 3, name: 'Corsair Vengeance 32GB DDR5', sku: 'RAM-COR-32D5', stock: 85, price: 2100000, old_price: 2500000, items_sold: 310, type: 'ram', category_id: 3, brand: 'Corsair Vengeance', weight: 150 },
+    { id: 4, name: 'Samsung 990 PRO 2TB NVMe', sku: 'SSD-SAM-2TB', stock: 120, price: 3200000, old_price: 3200000, items_sold: 450, type: 'ssd', category_id: 4, brand: 'Samsung PRO/EVO', weight: 80 },
+    { id: 5, name: 'ASUS ROG Crosshair X670E', sku: 'MB-ASUS-X670', stock: 20, price: 8500000, old_price: 9000000, items_sold: 65, type: 'mb', category_id: 5, brand: 'ASUS ROG/TUF/Prime', weight: 1800 }
 ];
 
 const categoryMeta = {

@@ -330,8 +330,8 @@ async function calculateTxShipping() {
     const btn = document.getElementById('btnCalcTxShipping');
     const resContainer = document.getElementById('txShippingResults');
     
-    // Default origin to Jakarta Selatan area ID for Biteship
-    const origin = "IDNP6IDNC148IDND838IDZ12110"; // ID Area untuk Kebayoran Baru, Jakarta Selatan. Asli dari Biteship.
+    // Default origin to Malang (Lowokwaru - Jl. Sunan Kalijaga / Sigura-gura)
+    const origin = "IDNP11IDNC250IDND2618IDZ65145";
     
     const dest = document.getElementById('txDestAreaId').value;
     const weight = document.getElementById('txShipWeight').value;
