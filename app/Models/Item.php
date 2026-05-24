@@ -18,6 +18,7 @@ class Item extends Model
         'stock',
         'price_usd',
         'profit_margin',
+        'weight',
     ];
 
     public function category()

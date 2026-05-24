@@ -68,8 +68,8 @@ function filterTransactions() {
         const statusColumn = `
             <div class="flex items-center gap-2">
                 ${statusBadge}
-                <button onclick="toggleTransactionStatus(${tx.id}, '${tx.status}')" class="text-gray-400 hover:text-accent font-medium text-xs flex items-center justify-center bg-gray-50 border border-gray-200 w-6 h-6 rounded-md shadow-sm transition" title="Ubah Status">
-                    <i class="fa-solid fa-arrows-rotate text-[10px]"></i>
+                <button onclick="openTxDetailModal(${tx.id})" class="text-accent hover:text-violet-700 font-medium text-xs flex items-center justify-center bg-violet-50 hover:bg-violet-100 border border-violet-100 w-7 h-7 rounded-md shadow-sm transition" title="Lihat Detail Transaksi">
+                    <i class="fa-solid fa-eye text-xs"></i>
                 </button>
             </div>
         `;
@@ -103,7 +103,7 @@ function openTxModal() {
             .then(res => {
                 const items = res.data.data;
                 items.forEach(item => {
-                    select.innerHTML += `<option value="${item.id}">${item.name} (${item.sku}) - Stock: ${item.stock}</option>`;
+                    select.innerHTML += `<option value="${item.id}" data-weight="${item.weight || 1000}">${item.name} (${item.sku}) - Stock: ${item.stock}</option>`;
                 });
             })
             .catch(err => console.error(err));
@@ -155,10 +155,63 @@ async function submitTransaction(event) {
     }
 }
 
-async function toggleTransactionStatus(id, currentStatus) {
-    const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
-    const confirmMsg = `Ubah status transaksi #${id} menjadi ${newStatus.toUpperCase()}?`;
-    if (!confirm(confirmMsg)) return;
+// --- Transaction Detail Modal ---
+
+function openTxDetailModal(id) {
+    const tx = currentTransactions.find(t => t.id === id);
+    if (!tx) return;
+
+    const modal = document.getElementById('txDetailModal');
+    
+    document.getElementById('detailTxId').value = tx.id;
+    document.getElementById('detailTxItemName').textContent = tx.item ? tx.item.name : 'Unknown Item';
+    document.getElementById('detailTxItemSku').textContent = `SKU: ${tx.item ? tx.item.sku : '-'}`;
+    
+    const isIncoming = tx.type === 'in';
+    document.getElementById('detailTxTypeBadge').innerHTML = isIncoming 
+        ? `<span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-semibold border border-green-100 inline-flex items-center gap-1"><i class="fa-solid fa-arrow-down"></i> Inbound</span>`
+        : `<span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold border border-indigo-100 inline-flex items-center gap-1"><i class="fa-solid fa-arrow-up"></i> Outbound</span>`;
+        
+    const dateStr = new Date(tx.created_at).toLocaleDateString('id-ID', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+    document.getElementById('detailTxDate').textContent = dateStr;
+    
+    document.getElementById('detailTxQuantity').textContent = `${isIncoming ? '+' : '-'}${tx.quantity} Unit`;
+    
+    const partnerName = isIncoming 
+        ? (tx.item && tx.item.supplier ? tx.item.supplier.name : 'Supplier')
+        : (tx.notes || 'Customer');
+    
+    // Notes logic: replace newline with <br>
+    const notesHtml = tx.notes ? tx.notes.replace(/\n/g, '<br>') : '-';
+    document.getElementById('detailTxNotes').innerHTML = `<strong>Partner:</strong> ${partnerName}<br><br><span class="text-xs text-gray-500">${notesHtml}</span>`;
+
+    const isCompleted = tx.status === 'completed';
+    document.getElementById('detailTxStatusBadge').innerHTML = isCompleted 
+        ? `<span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-100 inline-flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Completed</span>`
+        : `<span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-semibold border border-amber-100 inline-flex items-center gap-1"><i class="fa-solid fa-circle-notch fa-spin"></i> Pending</span>`;
+        
+    document.getElementById('detailTxStatusSelect').value = tx.status;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeTxDetailModal() {
+    const modal = document.getElementById('txDetailModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+async function saveTxDetailStatus() {
+    const id = document.getElementById('detailTxId').value;
+    const newStatus = document.getElementById('detailTxStatusSelect').value;
+    
+    const btn = document.getElementById('saveTxDetailBtn');
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...';
+    btn.disabled = true;
 
     try {
         await axios.put(`/api/transactions/${id}`, {
@@ -166,6 +219,7 @@ async function toggleTransactionStatus(id, currentStatus) {
         });
 
         alert('Status transaksi berhasil diubah!');
+        closeTxDetailModal();
         renderTransactions();
         if (typeof loadDashboardData === 'function') {
             loadDashboardData();
@@ -176,10 +230,30 @@ async function toggleTransactionStatus(id, currentStatus) {
             ? err.response.data.message 
             : 'Gagal mengubah status transaksi';
         alert(errMsg);
+    } finally {
+        btn.innerHTML = 'Simpan Perubahan';
+        btn.disabled = false;
     }
 }
 
+
 // --- Integrated Shipping Functions ---
+
+function updateShippingWeight() {
+    const select = document.getElementById('txItemSelect');
+    const qtyInput = document.getElementById('txQuantityInput');
+    const weightInput = document.getElementById('txShipWeight');
+    
+    if (select && select.selectedIndex > 0) {
+        const option = select.options[select.selectedIndex];
+        const unitWeight = parseInt(option.getAttribute('data-weight')) || 1000;
+        const qty = parseInt(qtyInput.value) || 1;
+        weightInput.value = unitWeight * qty;
+    }
+}
+
+document.getElementById('txItemSelect')?.addEventListener('change', updateShippingWeight);
+document.getElementById('txQuantityInput')?.addEventListener('input', updateShippingWeight);
 
 function toggleTxShipping() {
     const type = document.getElementById('txTypeSelect').value;
@@ -188,67 +262,83 @@ function toggleTxShipping() {
     if (type === 'out') {
         wrapper.classList.remove('hidden');
         wrapper.classList.add('flex');
-        
-        // Load provinces if not loaded yet
-        const provSelect = document.getElementById('txDestProvince');
-        if (provSelect.options.length <= 1) {
-            loadTxProvinces();
-        }
     } else {
         wrapper.classList.add('hidden');
         wrapper.classList.remove('flex');
     }
 }
 
-async function loadTxProvinces() {
-    const provSelect = document.getElementById('txDestProvince');
-    try {
-        const res = await axios.get('/api/proxy/provinces');
-        let options = '<option value="">Select Province...</option>';
-        res.data.data.forEach(p => {
-            options += `<option value="${p.province_id}">${p.province}</option>`;
-        });
-        provSelect.innerHTML = options;
-    } catch (e) {
-        console.error('API Error:', e);
-        provSelect.innerHTML = '<option value="">Failed to load API Provinces</option>';
-        alert('Gagal mengambil data Provinsi dari API asli. Periksa API Key Anda.');
-    }
+// Biteship Area Autocomplete
+let searchTimeout = null;
+const txDestSearch = document.getElementById('txDestSearch');
+const txDestResults = document.getElementById('txDestResults');
+const txDestAreaId = document.getElementById('txDestAreaId');
+
+if (txDestSearch) {
+    txDestSearch.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value;
+        
+        if (query.length < 3) {
+            txDestResults.classList.add('hidden');
+            return;
+        }
+
+        searchTimeout = setTimeout(async () => {
+            txDestResults.innerHTML = '<div class="p-3 text-xs text-gray-500 text-center"><i class="fa-solid fa-circle-notch fa-spin"></i> Mencari...</div>';
+            txDestResults.classList.remove('hidden');
+            try {
+                const res = await axios.get(`/api/proxy/areas?q=${encodeURIComponent(query)}`);
+                const areas = res.data.data;
+                
+                if (areas.length === 0) {
+                    txDestResults.innerHTML = '<div class="p-3 text-xs text-gray-500 text-center">Area tidak ditemukan</div>';
+                    return;
+                }
+
+                let html = '';
+                areas.forEach(area => {
+                    html += `
+                        <div class="p-3 text-xs border-b border-gray-50 hover:bg-gray-50 cursor-pointer" 
+                             onclick="selectArea('${area.id}', '${area.name}')">
+                            <div class="font-bold text-gray-800">${area.name}</div>
+                        </div>
+                    `;
+                });
+                txDestResults.innerHTML = html;
+            } catch (e) {
+                txDestResults.innerHTML = '<div class="p-3 text-xs text-red-500 text-center">Gagal memuat API</div>';
+            }
+        }, 500);
+    });
 }
 
-async function loadTxCities(provinceId) {
-    const citySelect = document.getElementById('txDestCity');
-    if (!provinceId) {
-        citySelect.innerHTML = '<option value="">Select City...</option>';
-        return;
-    }
-    try {
-        const res = await axios.get(`/api/proxy/cities?province=${provinceId}`);
-        let options = '<option value="">Select City...</option>';
-        res.data.data.forEach(c => {
-            options += `<option value="${c.city_id}">${c.type} ${c.city_name}</option>`;
-        });
-        citySelect.innerHTML = options;
-    } catch (e) {
-        console.error('API Error:', e);
-        citySelect.innerHTML = '<option value="">Failed to load API Cities</option>';
-        alert('Gagal mengambil data Kota dari API asli. Periksa API Key Anda.');
-    }
+function selectArea(id, name) {
+    txDestAreaId.value = id;
+    txDestSearch.value = name;
+    txDestResults.classList.add('hidden');
 }
+
+// Hide dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if (txDestSearch && txDestResults && !txDestSearch.contains(e.target) && !txDestResults.contains(e.target)) {
+        txDestResults.classList.add('hidden');
+    }
+});
 
 async function calculateTxShipping() {
     const btn = document.getElementById('btnCalcTxShipping');
     const resContainer = document.getElementById('txShippingResults');
     
-    // Default origin to Jakarta Selatan (153)
-    const origin = "153"; 
+    // Default origin to Jakarta Selatan area ID for Biteship
+    const origin = "IDNP6IDNC148IDND838IDZ12110"; // ID Area untuk Kebayoran Baru, Jakarta Selatan. Asli dari Biteship.
     
-    const dest = document.getElementById('txDestCity').value;
+    const dest = document.getElementById('txDestAreaId').value;
     const weight = document.getElementById('txShipWeight').value;
     const courier = document.getElementById('txShipCourier').value;
     
     if(!dest || !weight || !courier) {
-        alert("Please fill destination city, weight, and courier!");
+        alert("Pilih lokasi tujuan dari dropdown hasil pencarian!");
         return;
     }
     

@@ -12,17 +12,6 @@ use OpenApi\Annotations as OA;
 
 class TransactionController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/transactions",
-     *     operationId="getTransactionList",
-     *     summary="Ambil daftar transaksi stok",
-     *     security={{"bearerAuth":{}}},
-     *     tags={"Transactions"},
-     *     @OA\Response(response=200, description="Berhasil mengambil data transaksi"),
-     *     @OA\Response(response=401, description="Unauthorized")
-     * )
-     */
     public function index()
     {
         $transactions = StockTransaction::with(['item.category', 'user'])
@@ -35,29 +24,6 @@ class TransactionController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/transactions",
-     *     operationId="storeTransaction",
-     *     summary="Tambah transaksi baru",
-     *     security={{"bearerAuth":{}}},
-     *     tags={"Transactions"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"item_id", "type", "quantity"},
-     *             @OA\Property(property="item_id", type="integer", example=1),
-     *             @OA\Property(property="type", type="string", enum={"in", "out"}, example="in"),
-     *             @OA\Property(property="quantity", type="integer", example=10),
-     *             @OA\Property(property="notes", type="string", example="Restock item"),
-     *             @OA\Property(property="status", type="string", enum={"pending", "completed"}, example="completed")
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Transaksi berhasil ditambahkan"),
-     *     @OA\Response(response=400, description="Validasi gagal / Stok tidak mencukupi"),
-     *     @OA\Response(response=401, description="Unauthorized")
-     * )
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

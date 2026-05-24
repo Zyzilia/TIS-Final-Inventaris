@@ -67,6 +67,7 @@ class ItemController extends Controller
                     new OA\Property(property: 'sku', type: 'string', example: 'LAP-001'),
                     new OA\Property(property: 'price_usd', type: 'number', example: 1000),
                     new OA\Property(property: 'profit_margin', type: 'number', example: 10),
+                    new OA\Property(property: 'weight', type: 'integer', example: 1200),
                     new OA\Property(property: 'stock', type: 'integer', example: 10)
                 ]
             )
@@ -86,6 +87,7 @@ class ItemController extends Controller
             'sku' => 'required|string|unique:items,sku',
             'price_usd' => 'required|numeric|min:0',
             'profit_margin' => 'numeric|min:0',
+            'weight' => 'integer|min:0',
             'stock' => 'integer|min:0',
         ]);
 
@@ -186,6 +188,7 @@ class ItemController extends Controller
                     new OA\Property(property: 'sku', type: 'string', example: 'LAP-001'),
                     new OA\Property(property: 'price_usd', type: 'number', example: 1100),
                     new OA\Property(property: 'profit_margin', type: 'number', example: 12),
+                    new OA\Property(property: 'weight', type: 'integer', example: 1250),
                     new OA\Property(property: 'stock', type: 'integer', example: 12)
                 ]
             )
@@ -215,6 +218,7 @@ class ItemController extends Controller
             'sku' => 'string|unique:items,sku,'.$id,
             'price_usd' => 'numeric|min:0',
             'profit_margin' => 'numeric|min:0',
+            'weight' => 'integer|min:0',
             'stock' => 'integer|min:0',
         ]);
 

@@ -41,8 +41,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('customers', [CustomerController::class, 'store']);
 
         Route::prefix('proxy')->group(function () {
-            Route::get('provinces', [ProxyController::class, 'getProvinces']);
-            Route::get('cities', [ProxyController::class, 'getCities']);
+            Route::get('areas', [ProxyController::class, 'searchAreas']);
             Route::post('shipping-cost', [ProxyController::class, 'checkCost']);
             Route::get('currency-rates', [ProxyController::class, 'getCurrencyRates']);
         });

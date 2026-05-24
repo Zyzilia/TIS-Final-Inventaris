@@ -127,6 +127,7 @@ function openItemModal(id = null) {
             document.getElementById('itemStock').value = item.stock;
             document.getElementById('itemPriceUsd').value = item.price_usd;
             document.getElementById('itemMargin').value = item.profit_margin;
+            document.getElementById('itemWeight').value = item.weight || 1000;
         }
     }
     itemModal.classList.remove('hidden');
@@ -159,6 +160,7 @@ itemForm.addEventListener('submit', async (e) => {
         stock: document.getElementById('itemStock').value,
         price_usd: document.getElementById('itemPriceUsd').value,
         profit_margin: document.getElementById('itemMargin').value,
+        weight: document.getElementById('itemWeight').value,
     };
 
     try {

@@ -11,88 +11,37 @@ use OpenApi\Attributes as OA;
 class ProxyController extends Controller
 {
     #[OA\Get(
-        path: '/api/proxy/provinces',
-        operationId: 'getProvinces',
-        summary: 'Ambil daftar provinsi dari RajaOngkir',
+        path: '/api/proxy/areas',
+        operationId: 'searchAreas',
+        summary: 'Cari Area Biteship (Kecamatan/Kodepos)',
         security: [['bearerAuth' => []]],
-        tags: ['Logistics Gateway'],
-        responses: [
-            new OA\Response(response: 200, description: 'Berhasil mengambil daftar provinsi'),
-            new OA\Response(response: 500, description: 'Kesalahan Server')
-        ]
+        tags: ['Logistics Gateway']
     )]
-    public function getProvinces()
+    public function searchAreas(Request $request)
     {
         try {
-            $response = Http::withHeaders([
-                'key' => config('services.rajaongkir.key') ?? env('RAJAONGKIR_API_KEY'),
-            ])->get(env('RAJAONGKIR_BASE_URL').'/province');
-
-            if ($response->failed()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gagal mengambil data dari pihak ketiga',
-                    'errors' => $response->json()['rajaongkir']['status'] ?? null,
-                ], $response->status());
+            $query = $request->query('q');
+            if (!$query || strlen($query) < 3) {
+                return response()->json(['success' => true, 'data' => []], 200);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Daftar provinsi berhasil diambil',
-                'data' => $response->json()['rajaongkir']['results'],
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan pada server gateway',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    #[OA\Get(
-        path: '/api/proxy/cities',
-        operationId: 'getCities',
-        summary: 'Ambil daftar kota/kabupaten berdasarkan provinsi',
-        security: [['bearerAuth' => []]],
-        tags: ['Logistics Gateway'],
-        parameters: [
-            new OA\Parameter(name: 'province', in: 'query', required: true, description: 'ID Provinsi', schema: new OA\Schema(type: 'integer'))
-        ],
-        responses: [
-            new OA\Response(response: 200, description: 'Berhasil mengambil daftar kota'),
-            new OA\Response(response: 500, description: 'Kesalahan Server')
-        ]
-    )]
-    public function getCities(Request $request)
-    {
-        try {
-            $provinceId = $request->query('province');
-
-            $response = Http::withHeaders([
-                'key' => config('services.rajaongkir.key') ?? env('RAJAONGKIR_API_KEY'),
-            ])->get(env('RAJAONGKIR_BASE_URL').'/city', [
-                'province' => $provinceId,
+            $response = Http::withoutVerifying()->withHeaders([
+                'Authorization' => 'Bearer ' . config('services.biteship.key'),
+            ])->get(config('services.biteship.base_url') . '/maps/areas', [
+                'countries' => 'ID',
+                'input' => $query,
+                'type' => 'single'
             ]);
 
-            if ($response->failed()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gagal mengambil data kota',
-                    'errors' => $response->json()['rajaongkir']['status'] ?? null,
-                ], $response->status());
-            }
-
             return response()->json([
                 'success' => true,
-                'message' => 'Daftar kota berhasil diambil',
-                'data' => $response->json()['rajaongkir']['results'],
+                'data' => $response->json()['areas'] ?? []
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server gateway',
-                'error' => $e->getMessage(),
+                'message' => 'Gagal mencari area',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -124,7 +73,7 @@ class ProxyController extends Controller
             'origin' => 'required|string',
             'destination' => 'required|string',
             'weight' => 'required|integer|min:1',
-            'courier' => 'required|string|in:jne,pos,tiki',
+            'courier' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -136,27 +85,59 @@ class ProxyController extends Controller
         }
 
         try {
-            $response = Http::withHeaders([
-                'key' => config('services.rajaongkir.key') ?? env('RAJAONGKIR_API_KEY'),
-            ])->post(env('RAJAONGKIR_BASE_URL').'/cost', [
-                'origin' => $request->origin,
-                'destination' => $request->destination,
-                'weight' => $request->weight,
-                'courier' => $request->courier,
+            $response = Http::withoutVerifying()->withHeaders([
+                'Authorization' => 'Bearer ' . config('services.biteship.key'),
+                'Content-Type'  => 'application/json'
+            ])->post(config('services.biteship.base_url') . '/rates/couriers', [
+                'origin_area_id' => $request->origin,
+                'destination_area_id' => $request->destination,
+                'couriers' => $request->courier,
+                'items' => [
+                    [
+                        'name' => 'Barang Inventaris',
+                        'value' => 50000,
+                        'weight' => (int) $request->weight,
+                        'quantity' => 1
+                    ]
+                ]
             ]);
 
             if ($response->failed()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Gagal menghitung biaya pengiriman',
-                    'errors' => $response->json()['rajaongkir']['status'] ?? null,
+                    'errors' => $response->json(),
                 ], $response->status());
             }
 
+            $biteshipData = $response->json()['pricing'] ?? [];
+            
+            // Format to match RajaOngkir structure for the frontend
+            $mappedCosts = [];
+            foreach($biteshipData as $rate) {
+                $mappedCosts[] = [
+                    'service' => strtoupper($rate['courier_service_code']),
+                    'description' => $rate['courier_service_name'],
+                    'cost' => [
+                        [
+                            'value' => $rate['price'],
+                            'etd' => str_replace('days', 'hari', $rate['duration'] ?? '1-3')
+                        ]
+                    ]
+                ];
+            }
+
+            $rajaongkirFormat = [
+                [
+                    'name' => count($biteshipData) > 0 ? $biteshipData[0]['courier_name'] : strtoupper($request->courier),
+                    'costs' => $mappedCosts
+                ]
+            ];
+
             return response()->json([
                 'success' => true,
-                'message' => 'Kalkulasi biaya pengiriman berhasil',
-                'data' => $response->json()['rajaongkir']['results'],
+                'message' => 'Kalkulasi biaya pengiriman berhasil via Biteship',
+                'data' => $rajaongkirFormat,
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

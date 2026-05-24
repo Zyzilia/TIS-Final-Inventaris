@@ -47,7 +47,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-4 gap-3">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Stock</label>
                     <input type="number" id="itemStock" required min="0" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
@@ -59,6 +59,10 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Margin (%)</label>
                     <input type="number" step="0.1" id="itemMargin" required min="0" value="10" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Weight (g)</label>
+                    <input type="number" id="itemWeight" required min="1" value="1000" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
                 </div>
             </div>
 
@@ -210,7 +214,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
-                    <input type="number" id="txQuantityInput" required min="1" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
+                    <input type="number" id="txQuantityInput" required min="1" oninput="if(typeof updateShippingWeight === 'function') updateShippingWeight()" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent">
                 </div>
             </div>
 
@@ -235,13 +239,13 @@
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-[10px] font-medium text-gray-500 mb-1">Dest. Province</label>
-                        <select id="txDestProvince" class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-white focus:outline-none focus:border-accent" onchange="loadTxCities(this.value)"></select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-medium text-gray-500 mb-1">Dest. City</label>
-                        <select id="txDestCity" class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-white focus:outline-none focus:border-accent"></select>
+                    <div class="col-span-2 relative">
+                        <label class="block text-[10px] font-medium text-gray-500 mb-1">Tujuan (Kecamatan / Kodepos)</label>
+                        <input type="text" id="txDestSearch" placeholder="Ketik nama kecamatan..." class="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white focus:outline-none focus:border-accent" autocomplete="off">
+                        <input type="hidden" id="txDestAreaId">
+                        
+                        <!-- Search Results Dropdown -->
+                        <div id="txDestResults" class="absolute w-full bg-white border border-gray-100 shadow-xl rounded-md mt-1 hidden z-10 max-h-48 overflow-y-auto"></div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-medium text-gray-500 mb-1">Weight (grams)</label>
@@ -251,7 +255,10 @@
                         <label class="block text-[10px] font-medium text-gray-500 mb-1">Courier</label>
                         <select id="txShipCourier" class="w-full px-2 py-1.5 border border-gray-200 rounded-md text-xs bg-white focus:outline-none focus:border-accent">
                             <option value="jne">JNE</option>
-                            <option value="pos">POS</option>
+                            <option value="sicepat">SiCepat</option>
+                            <option value="jnt">J&T Express</option>
+                            <option value="anteraja">AnterAja</option>
+                            <option value="pos">POS Indonesia</option>
                             <option value="tiki">TIKI</option>
                         </select>
                     </div>
@@ -271,6 +278,65 @@
                 <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-accent hover:bg-violet-600 rounded-lg transition">Save Transaction</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Transaction Detail Modal -->
+<div id="txDetailModal" class="fixed inset-0 bg-gray-900/50 z-[65] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+        <div class="bg-darknav px-6 py-4 flex justify-between items-center text-white shrink-0">
+            <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-receipt text-accent"></i> Detail Transaksi</h3>
+            <button onclick="closeTxDetailModal()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto flex-1 flex flex-col gap-5 bg-gray-50/50">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h4 class="font-bold text-gray-900 text-xl" id="detailTxItemName">Loading...</h4>
+                    <p class="text-gray-500 text-sm mt-1" id="detailTxItemSku">SKU: -</p>
+                </div>
+                <div id="detailTxTypeBadge">
+                    <!-- Type Badge -->
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                <div>
+                    <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Tanggal & Waktu</span>
+                    <span class="font-semibold text-gray-800 text-sm" id="detailTxDate">-</span>
+                </div>
+                <div>
+                    <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Kuantitas</span>
+                    <span class="font-bold text-lg text-gray-900" id="detailTxQuantity">-</span>
+                </div>
+                <div class="col-span-2 border-t border-gray-50 pt-3 mt-1">
+                    <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Partner / Keterangan</span>
+                    <span class="font-medium text-gray-700 text-sm" id="detailTxNotes">-</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-1">Status Transaksi</span>
+                    <div id="detailTxStatusBadge" class="mt-1">
+                        <!-- Status Badge -->
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-2">Ubah Status</span>
+                    <select id="detailTxStatusSelect" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-accent bg-gray-50 font-medium text-gray-700 cursor-pointer">
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+            
+            <input type="hidden" id="detailTxId">
+        </div>
+        
+        <div class="bg-white px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
+            <button type="button" onclick="saveTxDetailStatus()" id="saveTxDetailBtn" class="px-5 py-2 text-sm font-semibold text-white bg-accent hover:bg-violet-600 rounded-lg transition shadow-sm shadow-accent/30">Simpan Perubahan</button>
+        </div>
     </div>
 </div>
 
