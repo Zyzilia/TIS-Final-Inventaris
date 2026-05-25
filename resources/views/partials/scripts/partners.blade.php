@@ -23,11 +23,11 @@ function switchPartnerTab(tabName) {
     if(!tabSup || !tabCust) return;
     
     if (tabName === 'suppliers') {
-        tabSup.className = 'pb-3 border-b-2 border-accent font-semibold text-accent';
-        tabCust.className = 'pb-3 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-800';
+        tabSup.className = 'pb-4 border-b-2 border-primary-600 font-extrabold text-primary-600 text-sm transition-all';
+        tabCust.className = 'pb-4 border-b-2 border-transparent font-bold text-gray-500 hover:text-gray-800 text-sm transition-all';
     } else {
-        tabCust.className = 'pb-3 border-b-2 border-accent font-semibold text-accent';
-        tabSup.className = 'pb-3 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-800';
+        tabCust.className = 'pb-4 border-b-2 border-primary-600 font-extrabold text-primary-600 text-sm transition-all';
+        tabSup.className = 'pb-4 border-b-2 border-transparent font-bold text-gray-500 hover:text-gray-800 text-sm transition-all';
     }
 
     const addBtn = document.getElementById('addPartnerBtn');
@@ -46,7 +46,7 @@ function loadPartners() {
     container.innerHTML = '';
     
     if (activePartnerTab === 'suppliers') {
-        container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fa-solid fa-circle-notch fa-spin text-xl text-accent font-medium"></i> Memuat data supplier...</div>`;
+        container.innerHTML = `<div class="text-center py-12 text-gray-400 font-medium"><i class="fa-solid fa-circle-notch fa-spin text-xl text-primary-500 mb-3"></i><br>Syncing supplier data...</div>`;
         axios.get('/api/suppliers')
             .then(res => {
                 const suppliers = res.data.data;
@@ -57,7 +57,7 @@ function loadPartners() {
                 renderSuppliersList(mockSuppliers);
             });
     } else {
-        container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="fa-solid fa-circle-notch fa-spin text-xl text-accent font-medium"></i> Memuat data customer...</div>`;
+        container.innerHTML = `<div class="text-center py-12 text-gray-400 font-medium"><i class="fa-solid fa-circle-notch fa-spin text-xl text-primary-500 mb-3"></i><br>Syncing customer database...</div>`;
         axios.get('/api/customers')
             .then(res => {
                 const customers = res.data.data;
@@ -75,24 +75,24 @@ function renderSuppliersList(suppliersList) {
     if (!container) return;
 
     let html = `
-        <table class="w-full text-left border-collapse text-sm">
-            <thead>
-                <tr class="text-gray-400 text-xs border-b border-gray-100 pb-4">
-                    <th class="pb-4 font-medium px-2">Supplier Name</th>
-                    <th class="pb-4 font-medium">Provided Category</th>
-                    <th class="pb-4 font-medium">Phone</th>
-                    <th class="pb-4 font-medium">Address</th>
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-50/50 sticky top-0 z-10 backdrop-blur-sm">
+                <tr class="text-gray-400 text-[11px] font-bold uppercase tracking-wider border-b border-gray-100">
+                    <th class="py-4 px-8">Supplier Name</th>
+                    <th class="py-4 px-4">Provided Category</th>
+                    <th class="py-4 px-4">Phone Contact</th>
+                    <th class="py-4 px-8">Address</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-50">
     `;
     suppliersList.forEach(sup => {
         html += `
-            <tr class="border-b border-gray-50 hover:bg-gray-50 transition text-xs">
-                <td class="py-4 px-2 font-semibold text-gray-800">${sup.name}</td>
-                <td class="py-4"><span class="px-2.5 py-1 rounded bg-violet-50 text-accent font-medium border border-violet-100">${sup.category}</span></td>
-                <td class="py-4 text-gray-600 font-mono">${sup.phone}</td>
-                <td class="py-4 text-gray-500">${sup.address}</td>
+            <tr class="hover:bg-primary-50/30 transition-colors group">
+                <td class="py-5 px-8 font-extrabold text-gray-900">${sup.name}</td>
+                <td class="py-5 px-4"><span class="px-3 py-1 rounded-lg bg-primary-50 text-primary-600 font-bold border border-primary-100 text-xs">${sup.category || 'Components'}</span></td>
+                <td class="py-5 px-4 text-gray-600 font-mono text-xs font-bold">${sup.phone}</td>
+                <td class="py-5 px-8 text-gray-500 font-medium text-xs">${sup.address}</td>
             </tr>
         `;
     });
@@ -105,24 +105,24 @@ function renderCustomersList(customersList) {
     if (!container) return;
 
     let html = `
-        <table class="w-full text-left border-collapse text-sm">
-            <thead>
-                <tr class="text-gray-400 text-xs border-b border-gray-100 pb-4">
-                    <th class="pb-4 font-medium px-2">Customer Name</th>
-                    <th class="pb-4 font-medium">Type</th>
-                    <th class="pb-4 font-medium">Phone</th>
-                    <th class="pb-4 font-medium">Location</th>
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-50/50 sticky top-0 z-10 backdrop-blur-sm">
+                <tr class="text-gray-400 text-[11px] font-bold uppercase tracking-wider border-b border-gray-100">
+                    <th class="py-4 px-8">Customer Name</th>
+                    <th class="py-4 px-4">Account Type</th>
+                    <th class="py-4 px-4">Phone Contact</th>
+                    <th class="py-4 px-8">Base Location</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-50">
     `;
     customersList.forEach(cust => {
         html += `
-            <tr class="border-b border-gray-50 hover:bg-gray-50 transition text-xs">
-                <td class="py-4 px-2 font-semibold text-gray-800">${cust.name}</td>
-                <td class="py-4"><span class="px-2.5 py-1 rounded bg-blue-50 text-blue-600 font-medium border border-blue-100">${cust.type}</span></td>
-                <td class="py-4 text-gray-600 font-mono">${cust.phone}</td>
-                <td class="py-4 text-gray-500">${cust.location}</td>
+            <tr class="hover:bg-primary-50/30 transition-colors group">
+                <td class="py-5 px-8 font-extrabold text-gray-900">${cust.name}</td>
+                <td class="py-5 px-4"><span class="px-3 py-1 rounded-lg bg-blue-50 text-blue-600 font-bold border border-blue-100 text-xs">${cust.type}</span></td>
+                <td class="py-5 px-4 text-gray-600 font-mono text-xs font-bold">${cust.phone}</td>
+                <td class="py-5 px-8 text-gray-500 font-medium text-xs">${cust.location}</td>
             </tr>
         `;
     });

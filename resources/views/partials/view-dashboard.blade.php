@@ -1,194 +1,179 @@
 <!-- VIEW 1: Dashboard / Overview (Active by default) -->
-<div id="view-dashboard" class="flex-1 flex flex-col xl:flex-row overflow-y-auto xl:overflow-hidden">
+<div id="view-dashboard" class="h-full flex flex-col xl:flex-row overflow-hidden">
     <!-- Center Column -->
-    <div class="flex-1 flex flex-col p-8 xl:overflow-y-auto min-w-0">
+    <div class="flex-1 flex flex-col p-8 overflow-y-auto min-w-0">
         
         <!-- Header -->
-        <header class="flex justify-between items-end mb-8">
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Overview</h1>
-                <p class="text-gray-500 text-sm mt-1">Detailed information about your store</p>
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">System Overview</h1>
+                <p class="text-gray-500 font-medium mt-1">Monitor your inventory and business performance</p>
             </div>
             @include('partials.header-actions')
         </header>
 
-        <div class="flex flex-col gap-6">
-            
-            <!-- Sales Analytics Bar Chart -->
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm relative">
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <h2 class="font-semibold text-gray-800 text-lg">Sales Analytics</h2>
+        <!-- Stats Grid (Top row for quick metrics) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card-standard p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Total Items</p>
+                    <h3 class="text-2xl font-bold text-gray-900" id="stat-total-items">0</h3>
+                </div>
+            </div>
+            <div class="card-standard p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Stock In</p>
+                    <h3 class="text-2xl font-bold text-gray-900" id="stat-stock-in">0</h3>
+                </div>
+            </div>
+            <div class="card-standard p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-cart-flatbed"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Stock Out</p>
+                    <h3 class="text-2xl font-bold text-gray-900" id="stat-stock-out">0</h3>
+                </div>
+            </div>
+            <div class="card-standard p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Active Partners</p>
+                    <h3 class="text-2xl font-bold text-gray-900" id="stat-partners">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <!-- Sales Analytics (Span 2) -->
+            <div class="xl:col-span-2 space-y-8">
+                <div class="card-standard p-8">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Inventory Flow</h2>
+                            <p class="text-sm text-gray-500 font-medium">Monthly inbound vs outbound trends</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="flex items-center gap-1.5 text-xs font-bold text-gray-600">
+                                <span class="w-2.5 h-2.5 rounded-full bg-primary-500"></span> Inbound
+                            </span>
+                            <span class="flex items-center gap-1.5 text-xs font-bold text-gray-600">
+                                <span class="w-2.5 h-2.5 rounded-full bg-primary-200"></span> Outbound
+                            </span>
+                        </div>
+                    </div>
+                    <div class="h-80 w-full relative">
+                        <canvas id="barChart"></canvas>
                     </div>
                 </div>
-                <div class="h-64 w-full relative">
-                    <canvas id="barChart"></canvas>
+
+                <!-- Category Summary Table -->
+                <div class="card-standard overflow-hidden">
+                    <div class="p-8 border-b border-gray-100 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Category Insights</h2>
+                            <p class="text-sm text-gray-500 font-medium">Distribution and stock health across categories</p>
+                        </div>
+                        <button onclick="switchView('categories')" class="text-primary-600 hover:text-primary-700 font-bold text-sm flex items-center gap-2">
+                            View Warehouse <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-gray-50/50">
+                                <tr class="text-gray-400 text-[11px] font-bold uppercase tracking-wider border-b border-gray-100">
+                                    <th class="py-4 px-8">Category Name</th>
+                                    <th class="py-4 px-4">Active Models</th>
+                                    <th class="py-4 px-4">Warehouse Stock</th>
+                                    <th class="py-4 px-4 text-right">Est. Sales Value</th>
+                                    <th class="py-4 px-8 text-center">Market Share</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categorySalesTableBody" class="text-sm divide-y divide-gray-50">
+                                <tr>
+                                    <td colspan="5" class="py-12 text-center text-gray-400">
+                                        <i class="fa-solid fa-circle-notch fa-spin text-primary-500 text-xl mb-2"></i>
+                                        <p class="font-medium">Aggregating warehouse data...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Top Sales by Country -->
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm flex flex-col">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="font-semibold text-gray-800 text-lg">Top sales by region</h2>
-                        <i class="fa-solid fa-grip-vertical text-gray-300"></i>
-                    </div>
-                    <div class="flex-1 flex flex-col justify-center items-center py-4">
-                        <div class="flex items-center justify-center h-48 relative">
-                            <div class="w-48 h-48">
-                                <canvas id="doughnutChart"></canvas>
-                            </div>
+            <!-- Side Column -->
+            <div class="space-y-8">
+                <!-- Market Regions Doughnut -->
+                <div class="card-standard p-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-2">Regional Sales</h2>
+                    <p class="text-sm text-gray-500 font-medium mb-8">Sales distribution by location</p>
+                    
+                    <div class="relative flex flex-col items-center">
+                        <div class="w-48 h-48 mb-8">
+                            <canvas id="doughnutChart"></canvas>
                         </div>
-                        <div class="flex justify-center gap-8 text-xs text-gray-500 mt-6 font-semibold">
-                            <span class="flex flex-col items-center gap-1">
-                                <span class="flex items-center gap-1.5">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-[#9A82EA]"></span>
-                                    <span class="text-gray-700">Jakarta</span>
-                                </span>
-                                <span id="doughnut-pct-jkt" class="text-accent text-sm font-bold">45%</span>
-                            </span>
-                            <span class="flex flex-col items-center gap-1">
-                                <span class="flex items-center gap-1.5">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-[#D3C6F9]"></span>
-                                    <span class="text-gray-700">Surabaya</span>
-                                </span>
-                                <span id="doughnut-pct-sby" class="text-gray-500 text-sm font-bold">20%</span>
-                            </span>
-                            <span class="flex flex-col items-center gap-1">
-                                <span class="flex items-center gap-1.5">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-[#1B1C22]"></span>
-                                    <span class="text-gray-700">Bandung</span>
-                                </span>
-                                <span id="doughnut-pct-bdg" class="text-gray-900 text-sm font-bold">18%</span>
-                            </span>
+                        <div class="w-full space-y-3">
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-primary-50/50 border border-primary-100/50">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3 h-3 rounded-full bg-primary-600"></span>
+                                    <span class="text-sm font-bold text-gray-700">Jakarta</span>
+                                </div>
+                                <span id="doughnut-pct-jkt" class="text-primary-600 font-extrabold">45%</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3 h-3 rounded-full bg-primary-300"></span>
+                                    <span class="text-sm font-bold text-gray-700">Surabaya</span>
+                                </div>
+                                <span id="doughnut-pct-sby" class="text-gray-500 font-extrabold">20%</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3 h-3 rounded-full bg-primary-900"></span>
+                                    <span class="text-sm font-bold text-gray-700">Bandung</span>
+                                </div>
+                                <span id="doughnut-pct-bdg" class="text-gray-900 font-extrabold">18%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Last Activity -->
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm flex flex-col">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-semibold text-gray-800 text-lg">Last activity</h2>
-                        <a href="#" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                <div class="card-standard flex flex-col h-[520px]">
+                    <div class="p-8 border-b border-gray-100 flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-gray-900">Activity Log</h2>
+                        <span class="w-8 h-8 rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-bolt"></i>
+                        </span>
                     </div>
-                    
-                    <div class="flex flex-col gap-3 flex-1 overflow-y-auto" id="activityList">
+                    <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar" id="activityList">
                         <!-- JS Populated -->
                     </div>
+                    <div class="p-4 bg-gray-50 text-center">
+                        <button class="text-primary-600 hover:text-primary-700 font-bold text-xs uppercase tracking-widest">
+                            View All Logs
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <!-- Product Sales Table (Rebranded to Category Sales Summary) -->
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="font-semibold text-gray-800 text-lg">Ringkasan Penjualan Kategori</h2>
-                    <a href="#" class="text-gray-400 hover:text-gray-700 flex items-center"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="text-gray-400 text-xs border-b border-gray-100">
-                                <th class="pb-4 font-medium px-2">Kategori Barang</th>
-                                <th class="pb-4 font-medium">Model Aktif</th>
-                                <th class="pb-4 font-medium">Total Stok Gudang</th>
-                                <th class="pb-4 font-medium text-right">Estimasi Terjual</th>
-                                <th class="pb-4 font-medium text-center px-6">Kontribusi Penjualan</th>
-                                <th class="pb-4 font-medium text-center px-2">Detail</th>
-                            </tr>
-                        </thead>
-                        <tbody id="categorySalesTableBody" class="text-sm">
-                            <tr>
-                                <td colspan="6" class="py-8 text-center text-gray-500">
-                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Memuat data kategori...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
         </div>
     </div>
 
-    <!-- Right Sidebar / Statistics Column -->
-    <div class="w-full xl:w-80 bg-bgmain p-6 xl:pl-0 flex flex-col gap-6 xl:overflow-y-auto shrink-0">
-        
-        <!-- Total Customers -->
-        <div class="bg-darkcard text-white p-6 rounded-[2rem] shadow-lg relative overflow-hidden h-48 flex flex-col justify-between">
-            <div class="flex justify-between items-start">
-                <h3 class="text-gray-400 font-medium">Total Customers</h3>
-                <i class="fa-solid fa-grip-vertical text-gray-600 text-sm"></i>
-            </div>
-            <div>
-                <div class="flex items-baseline gap-2">
-                    <h2 class="text-4xl font-bold">1,226</h2>
-                    <span class="text-green-500 text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> 79%</span>
-                </div>
-                <p class="text-xs text-gray-500 mt-1">683 users last month</p>
-            </div>
-            <div class="flex gap-2 items-center mt-2">
-                <div class="flex-1 h-8 rounded-lg overflow-hidden flex bg-white/10">
-                    <div class="h-full bg-white/20" style="width: 40%; background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px);"></div>
-                    <div class="h-full bg-white text-darkcard flex items-center justify-end px-3 text-xs font-bold" style="width: 60%;">60%</div>
-                </div>
-            </div>
-            <div class="flex justify-between text-[10px] text-gray-400 uppercase font-semibold tracking-wider">
-                <span><span class="inline-block w-1.5 h-1.5 border border-gray-400 rounded-full mr-1"></span>Retail</span>
-                <span><span class="inline-block w-1.5 h-1.5 bg-white rounded-full mr-1"></span>Wholesale</span>
-            </div>
-        </div>
-
-        <!-- Total Revenue -->
-        <div class="p-6 rounded-[2rem] shadow-lg text-white flex flex-col justify-between h-56 relative overflow-hidden" style="background: linear-gradient(135deg, #7C8EE2, #D4B9EE);">
-            <div class="flex justify-between items-start relative z-10">
-                <h3 class="text-white/80 font-medium">Total Revenue</h3>
-                <i class="fa-solid fa-grip-vertical text-white/50 text-sm"></i>
-            </div>
-            <div class="relative z-10">
-                <div class="flex items-baseline gap-2">
-                    <h2 class="text-4xl font-bold">$12,000</h2>
-                    <span class="text-white/80 text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-arrow-trend-down"></i> 10%</span>
-                </div>
-                <p class="text-xs text-white/70 mt-1">$15,650 last month</p>
-            </div>
-            <div class="h-16 w-full relative z-10 mt-2 flex items-end justify-between px-1 gap-1 opacity-90">
-                <div class="w-full bg-white rounded-t h-[40%]"></div>
-                <div class="w-full bg-white rounded-t h-[60%]"></div>
-                <div class="w-full bg-white rounded-t h-[30%] relative group">
-                    <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-darkcard text-white text-[10px] px-2 py-1 rounded hidden group-hover:block whitespace-nowrap">$1,210.6</div>
-                    <div class="w-full h-full bg-darknav rounded-t"></div>
-                </div>
-                <div class="w-full bg-white/50 rounded-t h-[40%]"></div>
-                <div class="w-full bg-white/50 rounded-t h-[30%]"></div>
-                <div class="w-full bg-white/50 rounded-t h-[50%]"></div>
-                <div class="w-full bg-white/50 rounded-t h-[20%]"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-white/70 mt-1 relative z-10 font-medium">
-                <span>1</span><span>4</span><span>8</span><span>12</span><span>16</span><span>20</span><span>24</span><span>30</span>
-            </div>
-            <div class="absolute bottom-[3.5rem] left-6 right-6 border-t border-dashed border-white/40 z-10"></div>
-        </div>
-
-        <!-- Total Orders -->
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm flex flex-col justify-between h-56" style="background: linear-gradient(180deg, #FFFFFF, #FFF5EC);">
-            <div class="flex justify-between items-start">
-                <h3 class="text-gray-500 font-medium">Total Orders</h3>
-                <i class="fa-solid fa-grip-vertical text-gray-300 text-sm"></i>
-            </div>
-            <div>
-                <div class="flex items-baseline gap-2">
-                    <h2 class="text-4xl font-bold text-gray-900">$15,210</h2>
-                    <span class="text-green-500 text-xs font-semibold flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> 51%</span>
-                </div>
-                <p class="text-xs text-gray-400 mt-1">$12,000 last month</p>
-            </div>
-            <div class="h-20 w-full relative mt-2">
-                <canvas id="lineChart"></canvas>
-            </div>
-        </div>
-
-        <button class="w-full bg-darknav text-white py-4 rounded-2xl font-medium shadow-lg hover:bg-gray-800 transition flex items-center justify-center gap-2 mt-auto">
-            <i class="fa-solid fa-arrow-up-from-bracket rotate-180"></i> Export statistics
-        </button>
-    </div>
+    <!-- Stats Panel (Optional/Secondary side) -->
+    <!-- We've integrated most stats into the main flow, but we can keep a thin side panel for live ticker/conversions if needed -->
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+</style>

@@ -16,11 +16,11 @@ function switchView(viewName) {
     navButtons.forEach(btnName => {
         const btn = document.getElementById(`btn-nav-${btnName}`);
         if (btnName === viewName) {
-            btn.classList.add('bg-white', 'text-darknav', 'shadow');
-            btn.classList.remove('text-gray-400', 'hover:text-white');
+            btn.classList.add('bg-primary-800', 'text-white', 'shadow-sm', 'border', 'border-primary-700/50');
+            btn.classList.remove('text-primary-300', 'hover:bg-primary-800/50', 'hover:text-white');
         } else {
-            btn.classList.remove('bg-white', 'text-darknav', 'shadow');
-            btn.classList.add('text-gray-400', 'hover:text-white');
+            btn.classList.remove('bg-primary-800', 'text-white', 'shadow-sm', 'border', 'border-primary-700/50');
+            btn.classList.add('text-primary-300', 'hover:bg-primary-800/50', 'hover:text-white');
         }
     });
 

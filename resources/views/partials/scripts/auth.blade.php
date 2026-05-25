@@ -8,11 +8,13 @@ if (!token) {
     if(userStr) {
         const user = JSON.parse(userStr);
         document.querySelectorAll('.profileImg').forEach(img => {
-            img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=9A82EA&color=fff`;
+            img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=7c3aed&color=fff`;
         });
         document.querySelectorAll('.dropdownUserName').forEach(el => {
             el.textContent = user.name;
         });
+        const sidebarName = document.getElementById('user-display-name');
+        if (sidebarName) sidebarName.textContent = user.name;
         document.querySelectorAll('.dropdownUserEmail').forEach(el => {
             el.textContent = user.email;
         });

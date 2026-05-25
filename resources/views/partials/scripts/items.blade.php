@@ -8,14 +8,14 @@ const pcPartsData = [
 ];
 
 const categoryMeta = {
-    1: { name: 'GPU', icon: 'fa-solid fa-microchip', bg: 'bg-indigo-50', text: 'text-indigo-500', border: 'border-indigo-100' },
-    2: { name: 'CPU', icon: 'fa-solid fa-server', bg: 'bg-blue-50', text: 'text-blue-500', border: 'border-blue-100' },
-    3: { name: 'RAM', icon: 'fa-solid fa-memory', bg: 'bg-green-50', text: 'text-green-500', border: 'border-green-100' },
-    4: { name: 'Storage', icon: 'fa-solid fa-hard-drive', bg: 'bg-slate-50', text: 'text-slate-500', border: 'border-slate-100' },
-    5: { name: 'Motherboard', icon: 'fa-solid fa-chess-board', bg: 'bg-red-50', text: 'text-red-500', border: 'border-red-100' },
-    6: { name: 'Power Supply (PSU)', icon: 'fa-solid fa-plug', bg: 'bg-amber-50', text: 'text-amber-500', border: 'border-amber-100' },
-    7: { name: 'PC Case', icon: 'fa-solid fa-computer', bg: 'bg-zinc-50', text: 'text-zinc-500', border: 'border-zinc-100' },
-    8: { name: 'Cooling (Fan/AIO)', icon: 'fa-solid fa-fan', bg: 'bg-teal-50', text: 'text-teal-500', border: 'border-teal-100' }
+    1: { name: 'GPU', icon: 'fa-solid fa-microchip', bg: 'bg-primary-50', text: 'text-primary-600', border: 'border-primary-100' },
+    2: { name: 'CPU', icon: 'fa-solid fa-server', bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100' },
+    3: { name: 'RAM', icon: 'fa-solid fa-memory', bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-100' },
+    4: { name: 'Storage', icon: 'fa-solid fa-hard-drive', bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-100' },
+    5: { name: 'Motherboard', icon: 'fa-solid fa-chess-board', bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-100' },
+    6: { name: 'Power Supply (PSU)', icon: 'fa-solid fa-plug', bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' },
+    7: { name: 'PC Case', icon: 'fa-solid fa-computer', bg: 'bg-zinc-50', text: 'text-zinc-600', border: 'border-zinc-100' },
+    8: { name: 'Cooling (Fan/AIO)', icon: 'fa-solid fa-fan', bg: 'bg-teal-50', text: 'text-teal-600', border: 'border-teal-100' }
 };
 
 const categoryBrands = {
@@ -106,28 +106,23 @@ function renderCategorySalesSummary() {
         const percentage = totalGlobalSold > 0 ? Math.round((stats.totalSold / totalGlobalSold) * 100) : 0;
 
         tbody.innerHTML += `
-            <tr class="border-b border-gray-50 hover:bg-gray-50 transition text-xs">
-                <td class="py-4 px-2 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-sm border border-gray-100 ${meta.bg} ${meta.text}">
+            <tr class="border-b border-gray-50 hover:bg-primary-50/30 transition-colors group">
+                <td class="py-4 px-8 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-base border ${meta.bg} ${meta.text} ${meta.border} shadow-sm">
                         <i class="${meta.icon}"></i>
                     </div>
-                    <span class="font-semibold text-gray-800 text-sm">${meta.name}</span>
+                    <span class="font-bold text-gray-900">${meta.name}</span>
                 </td>
-                <td class="py-4 font-medium text-gray-700">${stats.count} Model</td>
-                <td class="py-4 font-semibold text-gray-800">${stats.totalStock} Unit</td>
-                <td class="py-4 text-right font-bold text-gray-600 px-4">Rp ${Number(stats.totalRevenue).toLocaleString('id-ID', {maximumFractionDigits: 0})}</td>
-                <td class="py-4 px-6">
-                    <div class="flex items-center gap-2">
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-accent h-2 rounded-full" style="width: ${percentage}%"></div>
+                <td class="py-4 px-4 font-semibold text-gray-600">${stats.count} Models</td>
+                <td class="py-4 px-4 font-extrabold text-gray-900">${stats.totalStock} Unit</td>
+                <td class="py-4 px-4 text-right font-bold text-primary-600">Rp ${Number(stats.totalRevenue).toLocaleString('id-ID', {maximumFractionDigits: 0})}</td>
+                <td class="py-4 px-8">
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div class="bg-primary-500 h-full rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
                         </div>
-                        <span class="font-semibold text-gray-600 w-8 text-right">${percentage}%</span>
+                        <span class="font-extrabold text-gray-900 text-[11px] w-8 text-right">${percentage}%</span>
                     </div>
-                </td>
-                <td class="py-4 text-center">
-                    <button onclick="openSalesDetailModal(${catId})" class="text-accent hover:text-violet-600 mx-1 bg-violet-50 hover:bg-violet-100 w-8 h-8 rounded-full flex items-center justify-center transition border border-violet-100 inline-flex mx-auto" title="Detail Penjualan">
-                        <i class="fa-solid fa-eye text-xs"></i>
-                    </button>
                 </td>
             </tr>
         `;
@@ -162,22 +157,24 @@ function loadCategoriesGrid() {
         const stats = groups[catId];
 
         grid.innerHTML += `
-            <div onclick="openCategoryShelf(${catId})" class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-lg hover:border-accent/30 hover:-translate-y-1 transition duration-300 cursor-pointer">
+            <div onclick="openCategoryShelf(${catId})" class="card-standard p-6 flex flex-col justify-between hover:shadow-xl hover:border-primary-300 hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group">
                 <div class="flex justify-between items-start">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${meta.bg} ${meta.text} border ${meta.border}">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${meta.bg} ${meta.text} border ${meta.border} shadow-sm group-hover:scale-110 transition-transform">
                         <i class="${meta.icon}"></i>
                     </div>
-                    <span class="text-xs font-semibold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100">${stats.count} Models</span>
+                    <span class="text-[10px] font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded-full border border-primary-100 uppercase tracking-wider">${stats.count} Models</span>
                 </div>
-                <div class="mt-6">
-                    <h3 class="font-bold text-gray-800 text-lg">${meta.name}</h3>
-                    <div class="flex justify-between items-baseline mt-4 border-b border-gray-50 pb-2">
-                        <span class="text-xs text-gray-400">Total Stock:</span>
-                        <span class="font-bold text-gray-800 text-sm">${stats.totalStock} Units</span>
-                    </div>
-                    <div class="flex justify-between items-baseline mt-2">
-                        <span class="text-xs text-gray-400">Asset Value:</span>
-                        <span class="font-bold text-accent text-sm">Rp ${stats.totalValue.toLocaleString('id-ID', {maximumFractionDigits: 0})}</span>
+                <div class="mt-8">
+                    <h3 class="font-extrabold text-gray-900 text-xl tracking-tight">${meta.name}</h3>
+                    <div class="space-y-3 mt-6">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-500 font-medium">Stock Level</span>
+                            <span class="font-bold text-gray-900">${stats.totalStock} Units</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-500 font-medium">Asset Value</span>
+                            <span class="font-extrabold text-primary-600">Rp ${stats.totalValue.toLocaleString('id-ID', {maximumFractionDigits: 0})}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -241,21 +238,21 @@ function renderShelfItems() {
     shelfItems.forEach(item => {
         let basePriceIDR = item.price / (1 + (item.profit_margin / 100));
         tbody.innerHTML += `
-            <tr class="border-b border-gray-50 hover:bg-gray-50 transition text-xs">
-                <td class="py-4 px-2">
+            <tr class="border-b border-gray-50 hover:bg-primary-50/30 transition-colors group">
+                <td class="py-4 px-8">
                     <div class="flex flex-col">
-                        <span class="font-semibold text-gray-800 text-sm max-w-xs truncate" title="${item.name}">${item.name}</span>
-                        ${item.brand ? `<span class="text-[10px] text-gray-400 font-medium mt-0.5">${item.brand}</span>` : ''}
+                        <span class="font-bold text-gray-900 text-sm max-w-xs truncate" title="${item.name}">${item.name}</span>
+                        ${item.brand ? `<span class="text-[10px] text-primary-600 font-bold uppercase tracking-wider mt-0.5">${item.brand}</span>` : ''}
                     </div>
                 </td>
-                <td class="py-4 font-mono text-gray-500">${item.sku}</td>
-                <td class="py-4 font-bold text-gray-800">${item.stock} Unit</td>
-                <td class="py-4 text-gray-500">Rp ${basePriceIDR.toLocaleString('id-ID', {maximumFractionDigits: 0})}</td>
-                <td class="py-4"><span class="text-green-500 font-semibold bg-green-50 px-2 py-0.5 rounded text-[10px]">+${item.profit_margin}%</span></td>
-                <td class="py-4 font-semibold text-gray-800">Rp ${Number(item.price).toLocaleString('id-ID', {maximumFractionDigits: 0})}</td>
-                <td class="py-4 text-center px-2">
-                    <button onclick="openItemModal(${item.id})" class="text-blue-500 hover:text-blue-700 mx-1" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button onclick="confirmDelete(${item.id})" class="text-red-500 hover:text-red-700 mx-1" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                <td class="py-4 px-4 font-mono text-gray-400 text-xs">${item.sku}</td>
+                <td class="py-4 px-4 font-extrabold text-gray-900">${item.stock} Unit</td>
+                <td class="py-4 px-4 text-gray-500 font-medium">Rp ${basePriceIDR.toLocaleString('id-ID', {maximumFractionDigits: 0})}</td>
+                <td class="py-4 px-4"><span class="text-green-600 font-extrabold bg-green-50 px-2 py-0.5 rounded-lg border border-green-100 text-[10px]">+${item.profit_margin}%</span></td>
+                <td class="py-4 px-4 font-extrabold text-primary-600">Rp ${Number(item.price).toLocaleString('id-ID', {maximumFractionDigits: 0})}</td>
+                <td class="py-4 px-8 text-right space-x-2">
+                    <button onclick="openItemModal(${item.id})" class="text-primary-600 hover:text-white bg-white hover:bg-primary-600 border border-gray-200 hover:border-primary-600 w-8 h-8 rounded-lg shadow-sm transition-all" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button>
+                    <button onclick="confirmDelete(${item.id})" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-gray-200 hover:border-red-500 w-8 h-8 rounded-lg shadow-sm transition-all" title="Delete Item"><i class="fa-solid fa-trash text-xs"></i></button>
                 </td>
             </tr>
         `;

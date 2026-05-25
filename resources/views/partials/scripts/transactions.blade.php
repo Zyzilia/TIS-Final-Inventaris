@@ -57,18 +57,18 @@ function filterTransactions() {
 
         const isIncoming = tx.type === 'in';
         const typeBadge = isIncoming 
-            ? `<span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-semibold border border-green-100 inline-flex items-center gap-1"><i class="fa-solid fa-arrow-down"></i> Inbound</span>`
-            : `<span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold border border-indigo-100 inline-flex items-center gap-1"><i class="fa-solid fa-arrow-up"></i> Outbound</span>`;
+            ? `<span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-bold border border-green-100 inline-flex items-center gap-1.5"><i class="fa-solid fa-arrow-down-long text-[10px]"></i> Inbound</span>`
+            : `<span class="bg-primary-50 text-primary-600 px-3 py-1 rounded-full text-xs font-bold border border-primary-100 inline-flex items-center gap-1.5"><i class="fa-solid fa-arrow-up-long text-[10px]"></i> Outbound</span>`;
 
         const isCompleted = tx.status === 'completed';
         const statusBadge = isCompleted 
-            ? `<span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-100 inline-flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Completed</span>`
-            : `<span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-semibold border border-amber-100 inline-flex items-center gap-1"><i class="fa-solid fa-circle-notch fa-spin"></i> Pending</span>`;
+            ? `<span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-[10px] font-bold border border-green-100 uppercase tracking-wider inline-flex items-center gap-1.5"><i class="fa-solid fa-check-double"></i> Completed</span>`
+            : `<span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-[10px] font-bold border border-amber-100 uppercase tracking-wider inline-flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> Pending</span>`;
 
         const statusColumn = `
-            <div class="flex items-center gap-2">
+            <div class="flex items-center justify-end gap-3">
                 ${statusBadge}
-                <button onclick="openTxDetailModal(${tx.id})" class="text-accent hover:text-violet-700 font-medium text-xs flex items-center justify-center bg-violet-50 hover:bg-violet-100 border border-violet-100 w-7 h-7 rounded-md shadow-sm transition" title="Lihat Detail Transaksi">
+                <button onclick="openTxDetailModal(${tx.id})" class="text-primary-600 hover:text-white font-medium text-xs flex items-center justify-center bg-white hover:bg-primary-600 border border-gray-200 hover:border-primary-600 w-8 h-8 rounded-lg shadow-sm transition-all" title="View Details">
                     <i class="fa-solid fa-eye text-xs"></i>
                 </button>
             </div>
@@ -79,14 +79,14 @@ function filterTransactions() {
             : (tx.notes || 'Customer');
 
         tbody.innerHTML += `
-            <tr class="border-b border-gray-50 hover:bg-gray-50 transition text-xs">
-                <td class="py-4 px-2 text-gray-500 font-medium">${dateStr}</td>
-                <td class="py-4 font-semibold text-gray-800 text-sm">${tx.item ? tx.item.name : 'Unknown Item'}</td>
-                <td class="py-4 font-mono text-gray-400">${tx.item ? tx.item.sku : '-'}</td>
-                <td class="py-4">${typeBadge}</td>
-                <td class="py-4 text-center font-bold ${isIncoming ? 'text-green-600' : 'text-indigo-600'}">${isIncoming ? '+' : '-'}${tx.quantity}</td>
-                <td class="py-4 text-gray-700 font-medium">${partnerName}</td>
-                <td class="py-4">${statusColumn}</td>
+            <tr class="border-b border-gray-50 hover:bg-primary-50/30 transition-colors group">
+                <td class="py-4 px-6 text-gray-500 font-medium">${dateStr}</td>
+                <td class="py-4 px-4 font-bold text-gray-900">${tx.item ? tx.item.name : 'Unknown Item'}</td>
+                <td class="py-4 px-4 font-mono text-gray-400 text-xs">${tx.item ? tx.item.sku : '-'}</td>
+                <td class="py-4 px-4">${typeBadge}</td>
+                <td class="py-4 px-4 text-center font-extrabold ${isIncoming ? 'text-green-600' : 'text-primary-600'}">${isIncoming ? '+' : '-'}${tx.quantity}</td>
+                <td class="py-4 px-4 text-gray-600 font-semibold">${partnerName}</td>
+                <td class="py-4 px-6">${statusColumn}</td>
             </tr>
         `;
     });
@@ -169,8 +169,8 @@ function openTxDetailModal(id) {
     
     const isIncoming = tx.type === 'in';
     document.getElementById('detailTxTypeBadge').innerHTML = isIncoming 
-        ? `<span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-semibold border border-green-100 inline-flex items-center gap-1"><i class="fa-solid fa-arrow-down"></i> Inbound</span>`
-        : `<span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold border border-indigo-100 inline-flex items-center gap-1"><i class="fa-solid fa-arrow-up"></i> Outbound</span>`;
+        ? `<span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-bold border border-green-100 inline-flex items-center gap-1.5"><i class="fa-solid fa-arrow-down-long"></i> Inbound</span>`
+        : `<span class="bg-primary-50 text-primary-600 px-3 py-1 rounded-full text-xs font-bold border border-primary-100 inline-flex items-center gap-1.5"><i class="fa-solid fa-arrow-up-long"></i> Outbound</span>`;
         
     const dateStr = new Date(tx.created_at).toLocaleDateString('id-ID', {
         year: 'numeric', month: 'long', day: 'numeric',
@@ -190,8 +190,8 @@ function openTxDetailModal(id) {
 
     const isCompleted = tx.status === 'completed';
     document.getElementById('detailTxStatusBadge').innerHTML = isCompleted 
-        ? `<span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-100 inline-flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Completed</span>`
-        : `<span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-semibold border border-amber-100 inline-flex items-center gap-1"><i class="fa-solid fa-circle-notch fa-spin"></i> Pending</span>`;
+        ? `<span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-xs font-bold border border-green-100 uppercase tracking-wider inline-flex items-center gap-1.5"><i class="fa-solid fa-check-double"></i> Completed</span>`
+        : `<span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-bold border border-amber-100 uppercase tracking-wider inline-flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> Pending</span>`;
         
     document.getElementById('detailTxStatusSelect').value = tx.status;
     

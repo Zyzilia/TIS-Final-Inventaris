@@ -19,12 +19,20 @@
             theme: {
                 extend: {
                     colors: {
-                        darknav: '#1B1C22',
-                        darkcard: '#1F2128',
-                        accent: '#9A82EA',
-                        accentlight: '#D3C6F9',
-                        bgmain: '#F4F5F7',
-                        textgray: '#8C8E9B'
+                        primary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        },
+                        accent: '#8b5cf6',
+                        bgmain: '#f9fafb',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -34,18 +42,43 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #E6E8EE; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px;}
-        .glass-panel { background: white; border-radius: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.05); border: 8px solid white; display: flex; overflow: hidden; width: 100%; max-width: 1400px; height: 95vh; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f9fafb; 
+            margin: 0; 
+            padding: 0; 
+            height: 100vh; 
+            width: 100vw;
+            overflow: hidden;
+        }
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            background-color: #f9fafb;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
         
         #chartjs-tooltip { opacity: 1; position: absolute; background: rgba(0, 0, 0, 0.8); color: white; border-radius: 8px; pointer-events: none; transform: translate(-50%, 0); transition: all .1s ease; font-size: 12px; padding: 8px; z-index: 10; }
+        
+        /* Custom UI classes */
+        .card-standard {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border: 1px solid #f3f4f6;
+        }
     </style>
     @yield('styles')
 </head>
-<body class="@yield('body-class', '')">
+<body class="@yield('body-class', 'text-gray-900')">
 
-    @yield('content')
+    <div class="main-container">
+        @yield('content')
+    </div>
 
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none"></div>
