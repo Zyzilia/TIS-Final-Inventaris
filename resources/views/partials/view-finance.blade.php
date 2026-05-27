@@ -7,6 +7,7 @@
         </div>
         @include('partials.header-actions')
     </header>
+
     <div class="grid grid-cols-3 gap-6">
         <div class="col-span-2 bg-white p-8 rounded-[2rem] shadow-sm flex flex-col justify-between">
             <div>

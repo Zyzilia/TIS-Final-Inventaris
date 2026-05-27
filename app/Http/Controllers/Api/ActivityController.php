@@ -14,7 +14,7 @@ class ActivityController extends Controller
     public function index()
     {
         $activities = ActivityLog::orderBy('created_at', 'desc')
-            ->take(10)
+            ->take(30)
             ->get();
 
         return response()->json([
