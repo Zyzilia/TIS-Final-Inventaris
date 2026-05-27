@@ -34,8 +34,8 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #E6E8EE; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px;}
-        .glass-panel { background: white; border-radius: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.05); border: 8px solid white; display: flex; overflow: hidden; width: 100%; max-width: 1400px; height: 95vh; }
+        body { font-family: 'Inter', sans-serif; background-color: #F4F5F7; height: 100vh; margin: 0; overflow: hidden; }
+        .glass-panel { background: white; display: flex; overflow: hidden; width: 100vw; height: 100vh; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
