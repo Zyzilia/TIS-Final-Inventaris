@@ -1,121 +1,115 @@
-# 📦 Modern Inventory Management System
+# 📦 Sistem Manajemen Inventaris Modern
 
 <p align="center">
-  <strong>Comprehensive Inventory Management System with REST API</strong><br/>
-  Built with Laravel 12, JWT Authentication, and Tailwind CSS
+  <strong>Sistem Manajemen Inventaris Lengkap dengan REST API</strong><br/>
+  Dibangun menggunakan Laravel 12, JWT Authentication, dan Tailwind CSS
 </p>
 
 ---
 
-## 📋 Table of Contents
+## 📋 Daftar Isi
 
-- [Introduction](#-introduction)
-- [Key Features](#-key-features)
-- [Tech Stack](#-tech-stack)
-- [Installation](#-installation)
-- [Environment Setup](#-environment-setup)
-- [Running the Application](#-running-the-application)
-- [API Documentation](#-api-documentation)
-- [Database Schema](#-database-schema)
-- [Access Control & Roles](#-access-control--roles)
+- [Pendahuluan](#-pendahuluan)
+- [Fitur Utama](#-fitur-utama)
+- [Stack Teknologi](#-stack-teknologi)
+- [Instalasi](#-instalasi)
+- [Konfigurasi Lingkungan](#-konfigurasi-lingkungan)
+- [Cara Menjalankan](#-cara-menjalankan)
+- [Dokumentasi API](#-dokumentasi-api)
+- [Struktur Database](#-struktur-database)
+- [Hak Akses & Peran](#-hak-akses--peran)
 - [Testing](#-testing)
 
 ---
 
-## 🎯 Introduction
+## 🎯 Pendahuluan
 
-This **Modern Inventory Management System** is a robust solution designed to manage stock, categories, suppliers, customers, and transactions efficiently. It features a secure REST API using JWT Authentication and a role-based access control system to differentiate between administrative and warehouse staff permissions.
+Proyek ini adalah sistem manajemen inventaris yang dirancang untuk mengelola stok barang, kategori, supplier, customer, serta transaksi keluar-masuk barang secara efisien. Sistem ini dilengkapi dengan REST API yang aman menggunakan JWT Authentication dan sistem kontrol akses berbasis peran (RBAC) untuk membedakan hak akses antara Admin dan Staff Gudang.
 
-The application is suitable for:
-- Warehouse stock management
-- Recording inbound and outbound stock transactions
-- Integration with third-party logistics systems
-- Multi-user environments with clear role-based permissions
-
----
-
-## ✨ Key Features
-
-### 1. **Authentication & Authorization**
-- Secure login using JWT (JSON Web Token)
-- User profile management
-- Integrated logout with JWT token invalidation
-- Role-based Access Control (RBAC) for Admin and Warehouse Staff
-
-### 2. **Item Management (Hardware Parts System)**
-- Full CRUD for items (Admin) and view-only access (Staff)
-- **Custom Branding**: Support for specific hardware brands and series
-- **Automated Currency Conversion & Margins**: Base prices in USD with automated margin adjustments and conversion to IDR
-
-### 3. **Categories, Suppliers & Customers**
-- Hierarchical item categorization
-- Comprehensive supplier tracking and management
-- Customer data management for outbound transactions
-
-### 4. **Logistics Integration (Gateway Proxy)**
-- Area search (Sub-district/Postal code) via Biteship API
-- Shipping cost calculation based on weight (grams) and courier service (JNE, POS, TIKI, etc.)
-- Real-time logistics data fetching
-
-### 5. **Audit Trail & Activity Logs**
-- Automatic recording of system activities (purchases, stock adjustments, item edits)
-- Real-time activity history widget on the dashboard
-
-### 6. **Interactive Analytics & Finance**
-- Interactive sales charts (Sales Activity & Distribution)
-- Manual Currency & Margin settings to override external API data when needed
+Aplikasi ini dapat digunakan untuk:
+- Manajemen stok barang di gudang.
+- Pencatatan transaksi stok masuk (restock) dan keluar (penjualan).
+- Integrasi dengan sistem logistik pihak ketiga untuk cek ongkir.
+- Pelacakan aktivitas sistem melalui audit trail.
 
 ---
 
-## 🛠 Tech Stack
+## ✨ Fitur Utama
+
+### 1. **Autentikasi & Otorisasi**
+- Login aman menggunakan JWT (JSON Web Token).
+- Manajemen profil pengguna.
+- Sistem Logout dengan pembatalan token JWT.
+- Role-based Access Control (RBAC) untuk Admin dan Staff Gudang.
+
+### 2. **Manajemen Barang (Hardware Parts)**
+- Operasi CRUD lengkap untuk barang (khusus Admin).
+- **Custom Branding**: Dukungan untuk berbagai brand hardware dan seri komponen.
+- **Konversi Kurs Otomatis & Margin**: Harga dasar dalam USD yang otomatis dikonversi ke IDR dengan penyesuaian margin profit.
+
+### 3. **Kategori, Supplier & Customer**
+- Pengelompokan barang berdasarkan kategori.
+- Manajemen data supplier untuk pengadaan barang.
+- Manajemen data customer untuk transaksi keluar.
+
+### 4. **Integrasi Logistik (Proxy Gateway)**
+- Pencarian area (Kecamatan/Kodepos) melalui API Biteship.
+- Kalkulasi biaya pengiriman berdasarkan berat (gram) dan kurir (JNE, POS, TIKI, dll).
+- Pengambilan data kurs mata uang real-time (USD ke IDR).
+
+### 5. **Audit Trail & Log Aktivitas**
+- Pencatatan otomatis setiap aktivitas penting (penambahan stok, pengeditan barang, transaksi).
+- Widget riwayat aktivitas pada dashboard untuk monitoring real-time.
+
+### 6. **Analitik & Dashboard Interaktif**
+- Grafik aktivitas penjualan dan distribusi stok yang interaktif.
+- Pengaturan kurs dan margin manual untuk penyesuaian fleksibel.
+
+---
+
+## 🛠 Stack Teknologi
 
 ### Backend
-- **PHP 8.2+** - Primary programming language
-- **Laravel 12** - Modern PHP web framework
-- **MySQL/PostgreSQL** - Relational database
-- **JWT-Auth 2.3** - JWT Authentication
-- **L5-Swagger** - Interactive API documentation (Swagger UI)
+- **PHP 8.2+** - Bahasa pemrograman utama.
+- **Laravel 12** - Framework PHP modern.
+- **MySQL/PostgreSQL** - Database relasional.
+- **JWT-Auth 2.3** - Autentikasi berbasis token.
+- **L5-Swagger** - Dokumentasi API interaktif (Swagger UI).
 
 ### Frontend
-- **JavaScript (ES6+)** - Client-side logic & AJAX
-- **Tailwind CSS 4.0** - Utility-first CSS framework
-- **Chart.js** - Interactive data visualization
-- **Axios 1.11** - HTTP client for AJAX requests
-
-### Development Tools
-- **Composer** - PHP dependency manager
-- **npm** - Node package manager
-- **PHPUnit 11.5** - Automated testing suite
-- **Laravel Pint** - Code style formatter
+- **JavaScript (ES6+)** - Logika client-side & AJAX.
+- **Tailwind CSS 4.0** - Framework CSS utility-first.
+- **Chart.js** - Visualisasi data grafik.
+- **Axios 1.11** - HTTP client untuk request API.
 
 ---
 
-## 📦 Installation
+## 📦 Instalasi
 
-### Prerequisites
-- PHP 8.2 or higher
-- Composer
-- Node.js & npm
-- MySQL or PostgreSQL
+### Prasyarat
+- PHP 8.2 atau lebih tinggi.
+- Composer.
+- Node.js & npm.
+- Database MySQL atau PostgreSQL.
 
-### Step 1: Clone Repository
+### Langkah 1: Clone Repository
 ```bash
-git clone <repository-url>
-cd <project-directory>
+git clone <url-repository>
+cd <nama-folder-proyek>
 ```
 
-### Step 2: Install Dependencies
+### Langkah 2: Install Dependensi
 ```bash
-# Install PHP dependencies
+# Install library PHP
 composer install
 
-# Install JavaScript dependencies
+# Install library JavaScript
 npm install
 ```
 
-### Step 3: Setup Environment
+### Langkah 3: Setup Environment
 ```bash
-# Copy example env file
+# Copy file .env
 cp .env.example .env
 
 # Generate application key
@@ -125,196 +119,159 @@ php artisan key:generate
 php artisan jwt:secret
 ```
 
-### Step 4: Database Configuration
-Edit the `.env` file to match your database credentials:
+### Langkah 4: Konfigurasi Database
+Sesuaikan file `.env` dengan database lokal Anda:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=inventory_db
+DB_DATABASE=nama_db_anda
 DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### Step 5: Migration & Seeding
+### Langkah 5: Migrasi & Seeding
 ```bash
-# Run migrations
+# Jalankan migrasi tabel
 php artisan migrate
 
-# (Optional) Seed with dummy data
+# (Opsional) Isi data awal/dummy
 php artisan db:seed
 ```
 
-### Step 6: Build Frontend Assets
+### Langkah 6: Build Assets Frontend
 ```bash
-# Production build
+# Untuk produksi
 npm run build
 
-# Development with watch mode
+# Untuk mode development
 npm run dev
 ```
 
 ---
 
-## 🚀 Environment Setup
+## 🚀 Konfigurasi Lingkungan
 
-### Important Environment Variables
+### Variabel .env yang Penting
 ```env
-# App Configuration
-APP_NAME="InventoryManager"
-APP_ENV=local
-APP_DEBUG=true
+# Konfigurasi Aplikasi
+APP_NAME="SistemInventaris"
 APP_URL=http://localhost:8000
 
-# JWT Configuration
-JWT_ALGORITHM=HS256
-JWT_SECRET=your-secret-key
+# Konfigurasi JWT
+JWT_SECRET=hasil_dari_php_artisan_jwt_secret
 
-# Logistics API (e.g., Biteship)
-BITESHIP_API_KEY=your-api-key
+# API Key Logistik (Contoh: Biteship)
+BITESHIP_API_KEY=api_key_anda
 ```
-
-### Quick Setup Script
-```bash
-composer run setup
-```
-This script automates dependency installation, environment setup, migrations, and asset building.
 
 ---
 
-## ⚙️ Running the Application
+## ⚙️ Cara Menjalankan
 
-### Development Mode
+### Mode Development (Sekaligus)
 ```bash
 composer run dev
 ```
-Runs the PHP server, queue listener, logs viewer (Pail), and Vite dev server concurrently.
+Perintah ini akan menjalankan server PHP, listener queue, dan Vite secara bersamaan.
 
-### Manual Component Start
+### Menjalankan Secara Manual
 
-**PHP Server:**
+**Server PHP:**
 ```bash
 php artisan serve
 ```
 
-**Queue Listener:**
-```bash
-php artisan queue:listen
-```
-
-**Frontend Dev Server:**
+**Vite (Frontend):**
 ```bash
 npm run dev
 ```
 
 ---
 
-## 📡 API Documentation
+## 📡 Dokumentasi API
 
-### Interactive Swagger UI
-Access the interactive dashboard to explore and test endpoints:
+### Swagger UI (Interaktif)
+Anda bisa mencoba API secara langsung melalui dashboard Swagger di:
 ```
 URL: http://localhost:8000/api/documentation
 ```
 
-### Base URL
-```
-http://localhost:8000/api
-```
+### Endpoint Utama
 
-### Core Endpoints
-
-| Category | Endpoint | Method | Role |
+| Kategori | Endpoint | Method | Role |
 | :--- | :--- | :--- | :--- |
-| **Auth** | `/auth/login` | POST | Public |
-| | `/auth/profile` | GET | Authenticated |
-| | `/auth/logout` | POST | Authenticated |
-| **Items** | `/items` | GET | Admin, Staff |
+| **Auth** | `/auth/login` | POST | Publik |
+| | `/auth/profile` | GET | Admin, Staff |
+| **Barang** | `/items` | GET | Admin, Staff |
 | | `/items` | POST | Admin |
-| | `/items/{id}` | GET | Admin, Staff |
 | | `/items/{id}` | PUT | Admin |
-| | `/items/{id}` | DELETE | Admin |
-| **Transactions** | `/transactions` | GET | Admin, Staff |
-| | `/transactions` | POST | Admin, Staff |
-| | `/transactions/{id}` | PUT | Admin, Staff |
-| **Suppliers** | `/suppliers` | GET | Admin, Staff |
-| | `/suppliers` | POST | Admin, Staff |
-| **Customers** | `/customers` | GET | Admin, Staff |
-| | `/customers` | POST | Admin, Staff |
+| **Transaksi**| `/transactions` | POST | Admin, Staff |
 | **Proxy** | `/proxy/areas` | GET | Admin, Staff |
-| | `/proxy/shipping-cost` | POST | Admin, Staff |
-| | `/proxy/currency-rates` | GET | Admin, Staff |
-| **Logs** | `/activities` | GET | Admin, Staff |
+| | `/proxy/shipping-cost`| POST | Admin, Staff |
 
 ---
 
-## 📊 Database Schema
+## 📊 Struktur Database
 
-The system uses several core tables to manage data:
-- `users`: Managed users and roles.
-- `items`: Master data for hardware and inventory.
-- `categories`: Item classification.
-- `suppliers`: Supplier contact and info.
-- `customers`: Customer contact and info.
-- `stock_transactions`: Detailed log of stock movements (In/Out).
-- `activity_logs`: System-wide audit trail.
-
-Detailed schema definitions can be found in the `database/migrations` directory.
+Sistem ini menggunakan beberapa tabel utama:
+- `users`: Data pengguna dan peran (Admin/Staff).
+- `items`: Data master barang hardware.
+- `categories`: Kategori komponen.
+- `suppliers`: Data pemasok barang.
+- `customers`: Data pelanggan.
+- `stock_transactions`: Riwayat stok masuk dan keluar.
+- `activity_logs`: Log audit aktivitas sistem.
 
 ---
 
-## 🔐 Access Control & Roles
+## 🔐 Hak Akses & Peran
 
 ### Role: Admin
-- Full management of items (Create, Update, Delete)
-- Manage transactions and status updates
-- View all reports and audit logs
-- Access logistics and finance proxies
+- Memiliki akses penuh (CRUD) ke data barang.
+- Mengelola supplier, customer, dan kategori.
+- Melihat log aktivitas seluruh sistem.
+- Mengatur konfigurasi kurs dan margin.
 
-### Role: Warehouse Staff
-- View items and stock levels
-- Record and update stock transactions
-- Manage suppliers and customers
-- Access logistics proxies for shipping calculations
+### Role: Staff Gudang
+- Melihat daftar stok barang.
+- Mencatat transaksi masuk dan keluar.
+- Mengelola data supplier dan customer.
+- Melakukan cek ongkir melalui fitur proxy.
 
 ---
 
 ## 🧪 Testing
 
-### Running Tests
 ```bash
-# Run all tests
+# Jalankan semua unit & feature test
 composer run test
-
-# Run with coverage report
-php artisan test --coverage
 ```
 
 ---
 
-## 📁 Project Structure
+## 📁 Struktur Folder Proyek
 
 ```
 .
-├── app/                # Application logic (Controllers, Models, Middleware)
-├── config/             # Configuration files
-├── database/           # Migrations, Seeders, and Factories
-├── public/             # Entry point and static assets
-├── resources/          # Frontend assets (Views, CSS, JS)
-├── routes/             # API and Web route definitions
-├── storage/            # Compiled views, sessions, and logs
-├── tests/              # Feature and Unit tests
-├── composer.json       # PHP dependencies
-└── package.json        # Frontend dependencies
+├── app/                # Logika inti aplikasi (Controller, Model, Middleware)
+├── config/             # File konfigurasi Laravel
+├── database/           # Migrasi, Seeder, dan Factory
+├── public/             # Entry point (index.php) dan file statis
+├── resources/          # File frontend (Views, CSS, JS)
+├── routes/             # Definisi route API dan Web
+├── tests/              # File pengujian (PHPUnit)
+├── composer.json       # Dependensi PHP
+└── package.json        # Dependensi JS
 ```
 
 ---
 
-## 📄 License
+## 📄 Lisensi
 
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Proyek ini menggunakan lisensi [MIT](https://opensource.org/licenses/MIT).
 
 ---
 
-**Version:** 1.0.0  
-**Status:** Stable  
+**Versi:** 1.0.0  
+**Status:** Pengembangan Selesai  
