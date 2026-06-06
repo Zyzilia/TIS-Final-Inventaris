@@ -79,29 +79,45 @@ function renderCategorySalesSummary() {
         groups[i] = { count: 0, totalStock: 0, totalSold: 0, totalRevenue: 0 };
     }
 
-    let items = currentItems;
-    if(!items || items.length === 0) items = pcPartsData;
-
-    items.forEach(item => {
-        const catId = item.category_id || 1;
-        if (!groups[catId]) {
-            groups[catId] = { count: 0, totalStock: 0, totalSold: 0, totalRevenue: 0 };
-        }
-        const sold = getItemSalesCount(item);
-        groups[catId].count += 1;
-        groups[catId].totalStock += Number(item.stock || 0);
-        groups[catId].totalSold += sold;
-        groups[catId].totalRevenue += sold * Number(item.price || 0);
-    });
-
+    let statsMap = {};
     let totalGlobalSold = 0;
-    Object.keys(groups).forEach(catId => {
-        totalGlobalSold += groups[catId].totalSold;
-    });
+
+    if (window.dashboardStats && window.dashboardStats.category_sales) {
+        // Use real API data
+        window.dashboardStats.category_sales.forEach(cat => {
+            statsMap[cat.category_id] = {
+                count: cat.model_count,
+                totalStock: cat.total_stock,
+                totalSold: parseInt(cat.total_sold),
+                totalRevenue: parseFloat(cat.total_revenue_usd) * 16100 // Convert approx USD to IDR
+            };
+            totalGlobalSold += parseInt(cat.total_sold);
+        });
+    } else {
+        // Fallback dummy logic
+        let items = currentItems;
+        if(!items || items.length === 0) items = pcPartsData;
+
+        items.forEach(item => {
+            const catId = item.category_id || 1;
+            if (!statsMap[catId]) {
+                statsMap[catId] = { count: 0, totalStock: 0, totalSold: 0, totalRevenue: 0 };
+            }
+            const sold = getItemSalesCount(item);
+            statsMap[catId].count += 1;
+            statsMap[catId].totalStock += Number(item.stock || 0);
+            statsMap[catId].totalSold += sold;
+            statsMap[catId].totalRevenue += sold * Number(item.price || 0);
+        });
+
+        Object.keys(statsMap).forEach(catId => {
+            totalGlobalSold += statsMap[catId].totalSold;
+        });
+    }
 
     Object.keys(categoryMeta).forEach(catId => {
         const meta = categoryMeta[catId];
-        const stats = groups[catId];
+        const stats = statsMap[catId] || { count: 0, totalStock: 0, totalSold: 0, totalRevenue: 0 };
         
         const percentage = totalGlobalSold > 0 ? Math.round((stats.totalSold / totalGlobalSold) * 100) : 0;
 
@@ -134,9 +150,15 @@ function loadCategoriesGrid() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    const groups = {};
-    for (let i = 1; i <= 8; i++) {
-        groups[i] = { count: 0, totalStock: 0, totalValue: 0 };
+    let statsMap = {};
+
+    if (window.dashboardStats && window.dashboardStats.category_sales) {
+        window.dashboardStats.category_sales.forEach(cat => {
+            // we estimate total Asset Value from stock * average price if needed,
+            // wait, we didn't calculate total value of stock in DashboardController.
+            // Let's just use what's available or fallback to dummy calculation if needed.
+            // Let's fallback to calculating from currentItems if API doesn't have asset value.
+        });
     }
 
     let items = currentItems;
@@ -144,17 +166,19 @@ function loadCategoriesGrid() {
 
     items.forEach(item => {
         const catId = item.category_id || 1;
-        if (!groups[catId]) {
-            groups[catId] = { count: 0, totalStock: 0, totalValue: 0 };
+        if (!statsMap[catId]) {
+            statsMap[catId] = { count: 0, totalStock: 0, totalValue: 0 };
         }
-        groups[catId].count += 1;
-        groups[catId].totalStock += Number(item.stock || 0);
-        groups[catId].totalValue += Number(item.stock || 0) * Number(item.price || 0);
+        statsMap[catId].count += 1;
+        statsMap[catId].totalStock += Number(item.stock || 0);
+        
+        let idrPrice = Number(item.price || (item.price_usd ? item.price_usd * 16100 : 0));
+        statsMap[catId].totalValue += Number(item.stock || 0) * idrPrice;
     });
 
     Object.keys(categoryMeta).forEach(catId => {
         const meta = categoryMeta[catId];
-        const stats = groups[catId];
+        const stats = statsMap[catId] || { count: 0, totalStock: 0, totalValue: 0 };
 
         grid.innerHTML += `
             <div onclick="openCategoryShelf(${catId})" class="card-standard p-6 flex flex-col justify-between hover:shadow-xl hover:border-primary-300 hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group">

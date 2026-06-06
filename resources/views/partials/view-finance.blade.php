@@ -8,8 +8,8 @@
         @include('partials.header-actions')
     </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 card-standard p-8 flex flex-col justify-between">
+    <div class="grid grid-cols-3 gap-6">
+        <div class="col-span-2 bg-white p-8 rounded-[2rem] shadow-sm flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between mb-8">
                     <h3 class="font-extrabold text-gray-900 text-xl tracking-tight">Exchange Rate Converter</h3>

@@ -42,25 +42,10 @@
         }
     </script>
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f9fafb; 
-            margin: 0; 
-            padding: 0; 
-            height: 100vh; 
-            width: 100vw;
-            overflow: hidden;
-        }
-        .main-container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-            background-color: #f9fafb;
-        }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        body { font-family: 'Inter', sans-serif; background-color: #F4F5F7; height: 100vh; margin: 0; overflow: hidden; }
+        .glass-panel { background: white; display: flex; overflow: hidden; width: 100vw; height: 100vh; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
         #chartjs-tooltip { opacity: 1; position: absolute; background: rgba(0, 0, 0, 0.8); color: white; border-radius: 8px; pointer-events: none; transform: translate(-50%, 0); transition: all .1s ease; font-size: 12px; padding: 8px; z-index: 10; }
         

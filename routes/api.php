@@ -39,6 +39,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('suppliers', [SupplierController::class, 'store']);
         Route::get('customers', [CustomerController::class, 'index']);
         Route::post('customers', [CustomerController::class, 'store']);
+        Route::get('dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'stats']);
 
         Route::prefix('proxy')->group(function () {
             Route::get('areas', [ProxyController::class, 'searchAreas']);
