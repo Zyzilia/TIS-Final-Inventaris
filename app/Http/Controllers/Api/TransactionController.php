@@ -8,10 +8,71 @@ use App\Models\Item;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 
 class TransactionController extends Controller
 {
+    #[OA\Get(
+        path: '/api/transactions',
+        operationId: 'getTransactionList',
+        summary: 'Ambil daftar transaksi stok',
+        description: 'Mendapatkan seluruh riwayat transaksi mutasi stok (inbound & outbound) beserta detail barang, kategori, dan pengguna yang mencatat transaksi. Memerlukan hak akses Admin atau Staff.',
+        security: [['bearerAuth' => []]],
+        tags: ['Transactions'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Berhasil mengambil daftar transaksi',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'array',
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: 'id', type: 'integer', example: 1),
+                                    new OA\Property(property: 'item_id', type: 'integer', example: 1),
+                                    new OA\Property(property: 'user_id', type: 'integer', example: 1),
+                                    new OA\Property(property: 'type', type: 'string', enum: ['in', 'out'], example: 'in'),
+                                    new OA\Property(property: 'quantity', type: 'integer', example: 50),
+                                    new OA\Property(property: 'notes', type: 'string', nullable: true, example: 'Restock GPU bulanan'),
+                                    new OA\Property(property: 'status', type: 'string', enum: ['pending', 'completed'], example: 'completed'),
+                                    new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
+                                    new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
+                                    new OA\Property(
+                                        property: 'item',
+                                        type: 'object',
+                                        properties: [
+                                            new OA\Property(property: 'id', type: 'integer', example: 1),
+                                            new OA\Property(property: 'name', type: 'string', example: 'RTX 4060 Ti'),
+                                            new OA\Property(
+                                                property: 'category',
+                                                type: 'object',
+                                                properties: [
+                                                    new OA\Property(property: 'id', type: 'integer', example: 1),
+                                                    new OA\Property(property: 'name', type: 'string', example: 'GPU')
+                                                ]
+                                            )
+                                        ]
+                                    ),
+                                    new OA\Property(
+                                        property: 'user',
+                                        type: 'object',
+                                        properties: [
+                                            new OA\Property(property: 'id', type: 'integer', example: 1),
+                                            new OA\Property(property: 'name', type: 'string', example: 'Admin')
+                                        ]
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthorized')
+        ]
+    )]
     public function index()
     {
         $transactions = StockTransaction::with(['item.category', 'user'])
@@ -24,6 +85,44 @@ class TransactionController extends Controller
         ]);
     }
 
+    #[OA\Post(
+        path: '/api/transactions',
+        operationId: 'storeTransaction',
+        summary: 'Buat transaksi stok baru',
+        description: 'Mencatat transaksi mutasi stok baru (inbound/outbound). Jika outbound & status langsung completed, stok barang akan divalidasi dan dikurangi. Memerlukan hak akses Admin.',
+        security: [['bearerAuth' => []]],
+        tags: ['Transactions'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['item_id', 'type', 'quantity'],
+                properties: [
+                    new OA\Property(property: 'item_id', type: 'integer', example: 1),
+                    new OA\Property(property: 'type', type: 'string', enum: ['in', 'out'], example: 'in'),
+                    new OA\Property(property: 'quantity', type: 'integer', example: 10),
+                    new OA\Property(property: 'notes', type: 'string', example: 'Pemasukan barang dari Gigabyte'),
+                    new OA\Property(property: 'status', type: 'string', enum: ['pending', 'completed'], default: 'completed', example: 'completed')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Transaksi berhasil ditambahkan',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Transaksi berhasil ditambahkan'),
+                        new OA\Property(property: 'data', type: 'object')
+                    ]
+                )
+            ),
+            new OA\Response(response: 400, description: 'Stok barang tidak mencukupi untuk outbound'),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(response: 403, description: 'Forbidden - Hanya untuk Admin'),
+            new OA\Response(response: 422, description: 'Validasi input gagal')
+        ]
+    )]
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -101,26 +200,50 @@ class TransactionController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/transactions/{id}",
-     *     operationId="updateTransactionStatus",
-     *     summary="Update status transaksi (completed / pending)",
-     *     security={{"bearerAuth":{}}},
-     *     tags={"Transactions"},
-     *     @OA\Parameter(name="id", in="path", required=true, description="ID Transaksi", schema=@OA\Schema(type="integer")),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"status"},
-     *             @OA\Property(property="status", type="string", enum={"pending", "completed"}, example="completed")
-     *         )
-     *     ),
-     *     @OA\Response(response=200, description="Status transaksi berhasil diperbarui"),
-     *     @OA\Response(response=400, description="Penyesuaian stok gagal / stok tidak cukup"),
-     *     @OA\Response(response=404, description="Transaksi tidak ditemukan")
-     * )
-     */
+    #[OA\Put(
+        path: '/api/transactions/{id}',
+        operationId: 'updateTransactionStatus',
+        summary: 'Update status transaksi (completed / pending)',
+        description: 'Memperbarui status transaksi. Sistem akan otomatis menyesuaikan stok barang (increment/decrement/rollback) sesuai jenis transaksi dan status baru. Memerlukan hak akses Admin.',
+        security: [['bearerAuth' => []]],
+        tags: ['Transactions'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                required: true,
+                description: 'ID Transaksi',
+                schema: new OA\Schema(type: 'integer', example: 1)
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['status'],
+                properties: [
+                    new OA\Property(property: 'status', type: 'string', enum: ['pending', 'completed'], example: 'completed')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Status transaksi berhasil diperbarui',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Status transaksi berhasil diperbarui'),
+                        new OA\Property(property: 'data', type: 'object')
+                    ]
+                )
+            ),
+            new OA\Response(response: 400, description: 'Penyesuaian stok gagal / stok tidak cukup'),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(response: 403, description: 'Forbidden - Hanya untuk Admin'),
+            new OA\Response(response: 404, description: 'Transaksi tidak ditemukan'),
+            new OA\Response(response: 422, description: 'Validasi gagal')
+        ]
+    )]
     public function update(Request $request, string $id)
     {
         $tx = StockTransaction::find($id);

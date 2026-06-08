@@ -15,12 +15,100 @@
         }
     ],
     "paths": {
+        "/api/activities": {
+            "get": {
+                "tags": [
+                    "Audit Trail"
+                ],
+                "summary": "Ambil daftar log aktivitas terbaru",
+                "description": "Mendapatkan 10 log aktivitas terbaru dalam sistem inventaris (audit trail). Memerlukan hak akses Admin atau Staff.",
+                "operationId": "getActivityLogs",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil log aktivitas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
+                                                    },
+                                                    "user_name": {
+                                                        "type": "string",
+                                                        "example": "Admin"
+                                                    },
+                                                    "action": {
+                                                        "type": "string",
+                                                        "example": "Restock"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Admin menambahkan Laptop Asus ke Rak"
+                                                    },
+                                                    "item_type": {
+                                                        "type": "string",
+                                                        "example": "gpu"
+                                                    },
+                                                    "amount": {
+                                                        "type": "string",
+                                                        "example": "+10 Unit"
+                                                    },
+                                                    "order_id": {
+                                                        "type": "string",
+                                                        "example": "#000001"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-06-08T08:00:00.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-06-08T08:00:00.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Token JWT tidak valid atau kadaluwarsa"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "tags": [
                     "Authentication"
                 ],
                 "summary": "Login untuk mendapatkan token JWT",
+                "description": "Autentikasi pengguna dengan email dan password untuk mendapatkan token JWT. Token ini wajib digunakan pada header Authorization: Bearer {token} untuk mengakses endpoint yang dilindungi.",
                 "operationId": "loginUser",
                 "requestBody": {
                     "required": true,
@@ -50,7 +138,840 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Berhasil Login",
+                        "description": "Berhasil Login dan autentikasi sukses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Autentikasi berhasil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "access_token": {
+                                                    "type": "string",
+                                                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "bearer"
+                                                },
+                                                "expires_in": {
+                                                    "type": "integer",
+                                                    "example": 3600
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Admin"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email",
+                                                            "example": "admin@example.com"
+                                                        },
+                                                        "role": {
+                                                            "type": "string",
+                                                            "example": "admin"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Kredensial login salah (email atau password tidak valid)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid email or password"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Content - Validasi email/password gagal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/profile": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Dapatkan profil user saat ini",
+                "description": "Mengambil data profil pengguna yang sedang login berdasarkan token JWT yang valid.",
+                "operationId": "getUserProfile",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil profil pengguna",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Admin"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email",
+                                                    "example": "admin@example.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "admin"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Token JWT tidak valid atau kadaluwarsa"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user dan invalidasi token",
+                "description": "Melakukan logout pengguna yang sedang login dan mencabut/menonaktifkan token JWT saat ini.",
+                "operationId": "logoutUser",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil logout dan menghapus sesi token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Successfully logged out"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Token JWT tidak valid atau kadaluwarsa"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/customers": {
+            "get": {
+                "tags": [
+                    "Partners - Customers"
+                ],
+                "summary": "Ambil daftar customer",
+                "description": "Mendapatkan seluruh daftar customer/partner penerima barang. Memerlukan hak akses Admin atau Staff.",
+                "operationId": "getCustomerList",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil data customer",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Hyperion Tech"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "Wholesale Distributor"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string",
+                                                        "example": "+62-812-9999-8888"
+                                                    },
+                                                    "location": {
+                                                        "type": "string",
+                                                        "example": "Yogyakarta, Indonesia"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-06-08T08:00:00.000000Z"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2026-06-08T08:00:00.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Partners - Customers"
+                ],
+                "summary": "Tambah customer baru",
+                "description": "Menambahkan data customer baru ke dalam database. Memerlukan hak akses Admin.",
+                "operationId": "storeCustomer",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "type",
+                                    "phone",
+                                    "location"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Hyperion Tech"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "Wholesale Distributor"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+62-812-9999-8888"
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "example": "Yogyakarta, Indonesia"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Customer berhasil ditambahkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Customer berhasil ditambahkan"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Hyperion Tech"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "Wholesale Distributor"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+62-812-9999-8888"
+                                                },
+                                                "location": {
+                                                    "type": "string",
+                                                    "example": "Yogyakarta, Indonesia"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Hanya untuk Admin"
+                    },
+                    "422": {
+                        "description": "Validasi input gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/customers/{id}": {
+            "put": {
+                "tags": [
+                    "Partners - Customers"
+                ],
+                "summary": "Update data customer",
+                "description": "Memperbarui data customer berdasarkan ID. Memerlukan hak akses Admin.",
+                "operationId": "updateCustomer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Customer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Hyperion Tech Indo"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "Retail Distributor"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+62-812-9999-7777"
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "example": "Sleman, Yogyakarta"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Customer berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Customer berhasil diperbarui"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Hyperion Tech Indo"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "Retail Distributor"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+62-812-9999-7777"
+                                                },
+                                                "location": {
+                                                    "type": "string",
+                                                    "example": "Sleman, Yogyakarta"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Hanya untuk Admin"
+                    },
+                    "404": {
+                        "description": "Customer tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi update gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Partners - Customers"
+                ],
+                "summary": "Hapus customer",
+                "description": "Menghapus data customer dari database berdasarkan ID. Memerlukan hak akses Admin.",
+                "operationId": "deleteCustomer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Customer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Customer berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Customer berhasil dihapus"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Hanya untuk Admin"
+                    },
+                    "404": {
+                        "description": "Customer tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/items": {
+            "get": {
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Ambil daftar semua barang",
+                "description": "Mendapatkan seluruh daftar barang/komponen inventaris gudang beserta relasi kategori dan supplier. Harga barang dalam rupiah dikonversi secara real-time dari USD ke IDR menggunakan Finance Gateway API. Memerlukan hak akses Admin atau Staff.",
+                "operationId": "getItemList",
+                "responses": {
+                    "200": {
+                        "description": "Daftar barang berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar barang berhasil diambil"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "category_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "supplier_id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
+                                                    },
+                                                    "brand": {
+                                                        "type": "string",
+                                                        "example": "Asus",
+                                                        "nullable": true
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Laptop Asus ROG"
+                                                    },
+                                                    "sku": {
+                                                        "type": "string",
+                                                        "example": "LAP-001"
+                                                    },
+                                                    "price_usd": {
+                                                        "type": "number",
+                                                        "example": 1000
+                                                    },
+                                                    "price": {
+                                                        "description": "Harga dalam IDR setelah margin profit",
+                                                        "type": "number",
+                                                        "example": 17600000
+                                                    },
+                                                    "profit_margin": {
+                                                        "type": "number",
+                                                        "example": 10
+                                                    },
+                                                    "weight": {
+                                                        "type": "integer",
+                                                        "example": 1200
+                                                    },
+                                                    "stock": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "category": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "gpu"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "supplier": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Gigabyte"
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Tambah barang baru (Admin Only)",
+                "description": "Menambahkan data barang/komponen baru ke dalam inventaris gudang, mencatat log aktivitas restock, dan membuat riwayat transaksi masuk. Memerlukan hak akses Admin.",
+                "operationId": "storeItem",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "category_id",
+                                    "name",
+                                    "sku",
+                                    "price_usd"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "description": "ID Kategori Barang (1-8)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "supplier_id": {
+                                        "description": "ID Supplier Barang",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "brand": {
+                                        "description": "Merk Barang",
+                                        "type": "string",
+                                        "example": "Asus",
+                                        "nullable": true
+                                    },
+                                    "name": {
+                                        "description": "Nama Barang",
+                                        "type": "string",
+                                        "example": "Laptop Asus"
+                                    },
+                                    "sku": {
+                                        "description": "SKU Barang (Unik)",
+                                        "type": "string",
+                                        "example": "LAP-001"
+                                    },
+                                    "price_usd": {
+                                        "description": "Harga Barang (USD)",
+                                        "type": "number",
+                                        "example": 1000
+                                    },
+                                    "profit_margin": {
+                                        "description": "Persentase Profit Margin (%)",
+                                        "type": "number",
+                                        "example": 10
+                                    },
+                                    "weight": {
+                                        "description": "Berat Barang (gram)",
+                                        "type": "integer",
+                                        "example": 1200
+                                    },
+                                    "stock": {
+                                        "description": "Stok Barang Awal",
+                                        "type": "integer",
+                                        "example": 10
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Barang berhasil ditambahkan ke inventaris",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Barang berhasil ditambahkan ke inventaris"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Hanya untuk Admin"
+                    },
+                    "422": {
+                        "description": "Validasi input gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/items/{id}": {
+            "get": {
+                "tags": [
+                    "Inventory"
+                ],
+                "summary": "Ambil detail satu barang",
+                "description": "Mendapatkan informasi detail satu barang berdasarkan ID dengan kurs konversi IDR real-time. Memerlukan hak akses Admin atau Staff.",
+                "operationId": "getItemById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Barang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil detail barang",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -70,153 +991,9 @@
                     },
                     "401": {
                         "description": "Unauthorized"
-                    }
-                }
-            }
-        },
-        "/api/auth/profile": {
-            "get": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Dapatkan profil user saat ini",
-                "operationId": "getUserProfile",
-                "responses": {
-                    "200": {
-                        "description": "Berhasil mengambil profil"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/auth/logout": {
-            "post": {
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "Logout user dan invalidasi token",
-                "operationId": "logoutUser",
-                "responses": {
-                    "200": {
-                        "description": "Berhasil logout"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/items": {
-            "get": {
-                "tags": [
-                    "Inventory"
-                ],
-                "summary": "Ambil daftar semua barang",
-                "operationId": "getItemList",
-                "responses": {
-                    "200": {
-                        "description": "Berhasil mengambil data"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Inventory"
-                ],
-                "summary": "Tambah barang baru (Admin Only)",
-                "operationId": "storeItem",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "category_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Laptop Asus"
-                                    },
-                                    "sku": {
-                                        "type": "string",
-                                        "example": "LAP-001"
-                                    },
-                                    "price_usd": {
-                                        "type": "number",
-                                        "example": 1000
-                                    },
-                                    "profit_margin": {
-                                        "type": "number",
-                                        "example": 10
-                                    },
-                                    "stock": {
-                                        "type": "integer",
-                                        "example": 10
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/items/{id}": {
-            "get": {
-                "tags": [
-                    "Inventory"
-                ],
-                "summary": "Ambil detail satu barang",
-                "operationId": "getItemById",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID Barang",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Berhasil mengambil data"
                     },
                     "404": {
-                        "description": "Barang tidak ditemukan"
+                        "description": "Data barang tidak ditemukan"
                     }
                 },
                 "security": [
@@ -230,6 +1007,7 @@
                     "Inventory"
                 ],
                 "summary": "Update data barang (Admin Only)",
+                "description": "Memperbarui data barang/komponen berdasarkan ID. Jika stok diubah, sistem akan otomatis mencatat log aktivitas Restock/Audit dan merekamnya dalam transaksi stok masuk/keluar. Memerlukan hak akses Admin.",
                 "operationId": "updateItem",
                 "parameters": [
                     {
@@ -238,7 +1016,8 @@
                         "description": "ID Barang",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
@@ -251,6 +1030,15 @@
                                     "category_id": {
                                         "type": "integer",
                                         "example": 1
+                                    },
+                                    "supplier_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "brand": {
+                                        "type": "string",
+                                        "example": "Asus"
                                     },
                                     "name": {
                                         "type": "string",
@@ -268,6 +1056,10 @@
                                         "type": "number",
                                         "example": 12
                                     },
+                                    "weight": {
+                                        "type": "integer",
+                                        "example": 1250
+                                    },
                                     "stock": {
                                         "type": "integer",
                                         "example": 12
@@ -280,13 +1072,39 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Berhasil diupdate"
+                        "description": "Informasi barang berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Informasi barang berhasil diperbarui"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Forbidden - Hanya untuk Admin"
                     },
                     "404": {
-                        "description": "Barang tidak ditemukan"
+                        "description": "Data barang tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi update gagal"
                     }
                 },
                 "security": [
@@ -300,6 +1118,7 @@
                     "Inventory"
                 ],
                 "summary": "Hapus data barang (Admin Only)",
+                "description": "Menghapus permanen data barang dari inventaris gudang dan mencatat log aktivitas penghapusan. Memerlukan hak akses Admin.",
                 "operationId": "deleteItem",
                 "parameters": [
                     {
@@ -308,19 +1127,40 @@
                         "description": "ID Barang",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Berhasil dihapus"
+                        "description": "Barang berhasil dihapus permanen",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Barang berhasil dihapus permanen"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Forbidden - Hanya untuk Admin"
                     },
                     "404": {
-                        "description": "Barang tidak ditemukan"
+                        "description": "Data barang tidak ditemukan"
                     }
                 },
                 "security": [
@@ -330,52 +1170,73 @@
                 ]
             }
         },
-        "/api/proxy/provinces": {
+        "/api/proxy/areas": {
             "get": {
                 "tags": [
                     "Logistics Gateway"
                 ],
-                "summary": "Ambil daftar provinsi dari RajaOngkir",
-                "operationId": "getProvinces",
-                "responses": {
-                    "200": {
-                        "description": "Berhasil mengambil daftar provinsi"
-                    },
-                    "500": {
-                        "description": "Kesalahan Server"
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
-            }
-        },
-        "/api/proxy/cities": {
-            "get": {
-                "tags": [
-                    "Logistics Gateway"
-                ],
-                "summary": "Ambil daftar kota/kabupaten berdasarkan provinsi",
-                "operationId": "getCities",
+                "summary": "Cari Area Biteship (Kecamatan/Kodepos)",
+                "description": "Mencari area di Indonesia menggunakan Biteship API berdasarkan nama kecamatan atau kode pos (min 3 karakter). Memerlukan hak akses Admin atau Staff.",
+                "operationId": "searchAreas",
                 "parameters": [
                     {
-                        "name": "province",
+                        "name": "q",
                         "in": "query",
-                        "description": "ID Provinsi",
+                        "description": "Nama kecamatan atau kode pos",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "example": "Mampang",
+                            "minLength": 3
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Berhasil mengambil daftar kota"
+                        "description": "Berhasil melakukan pencarian area",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "example": "ID-12345"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Mampang Prapatan"
+                                                    },
+                                                    "postal_code": {
+                                                        "type": "integer",
+                                                        "example": 12790
+                                                    },
+                                                    "country": {
+                                                        "type": "string",
+                                                        "example": "ID"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Token JWT tidak valid atau kadaluwarsa"
                     },
                     "500": {
-                        "description": "Kesalahan Server"
+                        "description": "Gagal mencari area karena kendala gateway api"
                     }
                 },
                 "security": [
@@ -390,27 +1251,38 @@
                 "tags": [
                     "Logistics Gateway"
                 ],
-                "summary": "Cek ongkir via RajaOngkir Proxy",
+                "summary": "Cek ongkir via Biteship Proxy",
+                "description": "Mendapatkan tarif pengiriman berdasarkan asal, tujuan, berat, dan kurir melalui Biteship API yang diformat menyerupai RajaOngkir. Memerlukan hak akses Admin atau Staff.",
                 "operationId": "checkShipping",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "origin",
+                                    "destination",
+                                    "weight",
+                                    "courier"
+                                ],
                                 "properties": {
                                     "origin": {
+                                        "description": "ID Area Biteship Asal",
                                         "type": "string",
                                         "example": "501"
                                     },
                                     "destination": {
+                                        "description": "ID Area Biteship Tujuan",
                                         "type": "string",
                                         "example": "114"
                                     },
                                     "weight": {
+                                        "description": "Berat barang dalam gram",
                                         "type": "integer",
                                         "example": 1000
                                     },
                                     "courier": {
+                                        "description": "Kode kurir (misal: jne, sicepat, jnt)",
                                         "type": "string",
                                         "example": "jne"
                                     }
@@ -422,7 +1294,77 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Berhasil melakukan kalkulasi ongkos kirim",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kalkulasi biaya pengiriman berhasil via Biteship"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "JNE"
+                                                    },
+                                                    "costs": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "service": {
+                                                                    "type": "string",
+                                                                    "example": "REG"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "example": "Layanan Reguler"
+                                                                },
+                                                                "cost": {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "value": {
+                                                                                "type": "integer",
+                                                                                "example": 12000
+                                                                            },
+                                                                            "etd": {
+                                                                                "type": "string",
+                                                                                "example": "1-2 hari"
+                                                                            }
+                                                                        },
+                                                                        "type": "object"
+                                                                    }
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Token JWT tidak valid atau kadaluwarsa"
+                    },
+                    "422": {
+                        "description": "Validasi parameter input gagal"
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan kalkulasi pada server gateway"
                     }
                 },
                 "security": [
@@ -437,14 +1379,703 @@
                 "tags": [
                     "Finance Gateway"
                 ],
-                "summary": "Ambil kurs mata uang asing (USD ke IDR) untuk import parts",
+                "summary": "Ambil kurs mata uang asing (USD ke IDR)",
+                "description": "Mendapatkan kurs konversi mata uang asing real-time (USD, SGD, CNY ke IDR) untuk kebutuhan impor barang/komponen. Memerlukan hak akses Admin atau Staff.",
                 "operationId": "getCurrencyRates",
                 "responses": {
                     "200": {
-                        "description": "Berhasil mengambil kurs"
+                        "description": "Kurs berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Kurs berhasil diambil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "base": {
+                                                    "type": "string",
+                                                    "example": "USD"
+                                                },
+                                                "rates": {
+                                                    "properties": {
+                                                        "IDR": {
+                                                            "type": "number",
+                                                            "example": 16250.5
+                                                        },
+                                                        "SGD": {
+                                                            "type": "number",
+                                                            "example": 1.35
+                                                        },
+                                                        "CNY": {
+                                                            "type": "number",
+                                                            "example": 7.24
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "last_updated": {
+                                                    "type": "string",
+                                                    "example": "Mon, 08 Jun 2026 00:00:00 +0000"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
                     },
                     "500": {
-                        "description": "Kesalahan Server"
+                        "description": "Terjadi kesalahan pada server currency gateway"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/suppliers": {
+            "get": {
+                "tags": [
+                    "Partners - Suppliers"
+                ],
+                "summary": "Ambil daftar supplier beserta kategori komponen yang dipasok",
+                "description": "Mendapatkan seluruh daftar supplier/partner pemasok barang beserta kategori komponen yang mereka pasok. Memerlukan hak akses Admin atau Staff.",
+                "operationId": "getSupplierList",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil data supplier",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Gigabyte Technology"
+                                                    },
+                                                    "address": {
+                                                        "type": "string",
+                                                        "example": "New Taipei City, Taiwan"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string",
+                                                        "example": "+886-2-8912-4000"
+                                                    },
+                                                    "category": {
+                                                        "type": "string",
+                                                        "example": "Motherboard & GPU"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Partners - Suppliers"
+                ],
+                "summary": "Tambah supplier baru",
+                "description": "Menambahkan data supplier baru ke dalam database. Memerlukan hak akses Admin.",
+                "operationId": "storeSupplier",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "address",
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Gigabyte Technology"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "New Taipei City, Taiwan"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+886-2-8912-4000"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Supplier berhasil ditambahkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Supplier berhasil ditambahkan"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Gigabyte Technology"
+                                                },
+                                                "address": {
+                                                    "type": "string",
+                                                    "example": "New Taipei City, Taiwan"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+886-2-8912-4000"
+                                                },
+                                                "category": {
+                                                    "type": "string",
+                                                    "example": "General"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Hanya untuk Admin"
+                    },
+                    "422": {
+                        "description": "Validasi input gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/suppliers/{id}": {
+            "put": {
+                "tags": [
+                    "Partners - Suppliers"
+                ],
+                "summary": "Update data supplier",
+                "description": "Memperbarui data supplier berdasarkan ID. Memerlukan hak akses Admin.",
+                "operationId": "updateSupplier",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Supplier",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Gigabyte Tech Co Ltd"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Taipei, Taiwan"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+886-2-8912-4001"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Supplier berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Supplier berhasil diperbarui"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Gigabyte Tech Co Ltd"
+                                                },
+                                                "address": {
+                                                    "type": "string",
+                                                    "example": "Taipei, Taiwan"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "+886-2-8912-4001"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Hanya untuk Admin"
+                    },
+                    "404": {
+                        "description": "Supplier tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi update gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Partners - Suppliers"
+                ],
+                "summary": "Hapus supplier",
+                "description": "Menghapus data supplier dari database berdasarkan ID. Memerlukan hak akses Admin.",
+                "operationId": "deleteSupplier",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Supplier",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Supplier berhasil dihapus",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Supplier berhasil dihapus"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Hanya untuk Admin"
+                    },
+                    "404": {
+                        "description": "Supplier tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Ambil daftar transaksi stok",
+                "description": "Mendapatkan seluruh riwayat transaksi mutasi stok (inbound & outbound) beserta detail barang, kategori, dan pengguna yang mencatat transaksi. Memerlukan hak akses Admin atau Staff.",
+                "operationId": "getTransactionList",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil daftar transaksi",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "item_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "in",
+                                                        "enum": [
+                                                            "in",
+                                                            "out"
+                                                        ]
+                                                    },
+                                                    "quantity": {
+                                                        "type": "integer",
+                                                        "example": 50
+                                                    },
+                                                    "notes": {
+                                                        "type": "string",
+                                                        "example": "Restock GPU bulanan",
+                                                        "nullable": true
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "completed",
+                                                        "enum": [
+                                                            "pending",
+                                                            "completed"
+                                                        ]
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "item": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "RTX 4060 Ti"
+                                                            },
+                                                            "category": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "example": "GPU"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Admin"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Buat transaksi stok baru",
+                "description": "Mencatat transaksi mutasi stok baru (inbound/outbound). Jika outbound & status langsung completed, stok barang akan divalidasi dan dikurangi. Memerlukan hak akses Admin.",
+                "operationId": "storeTransaction",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "item_id",
+                                    "type",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "item_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "in",
+                                        "enum": [
+                                            "in",
+                                            "out"
+                                        ]
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Pemasukan barang dari Gigabyte"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "completed",
+                                        "default": "completed",
+                                        "enum": [
+                                            "pending",
+                                            "completed"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Transaksi berhasil ditambahkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Transaksi berhasil ditambahkan"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Stok barang tidak mencukupi untuk outbound"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Hanya untuk Admin"
+                    },
+                    "422": {
+                        "description": "Validasi input gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/transactions/{id}": {
+            "put": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Update status transaksi (completed / pending)",
+                "description": "Memperbarui status transaksi. Sistem akan otomatis menyesuaikan stok barang (increment/decrement/rollback) sesuai jenis transaksi dan status baru. Memerlukan hak akses Admin.",
+                "operationId": "updateTransactionStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID Transaksi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "completed",
+                                        "enum": [
+                                            "pending",
+                                            "completed"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status transaksi berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Status transaksi berhasil diperbarui"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Penyesuaian stok gagal / stok tidak cukup"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Hanya untuk Admin"
+                    },
+                    "404": {
+                        "description": "Transaksi tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
                     }
                 },
                 "security": [
@@ -466,8 +2097,16 @@
     },
     "tags": [
         {
+            "name": "Audit Trail",
+            "description": "Audit Trail"
+        },
+        {
             "name": "Authentication",
             "description": "Authentication"
+        },
+        {
+            "name": "Partners - Customers",
+            "description": "Partners - Customers"
         },
         {
             "name": "Inventory",
@@ -480,6 +2119,14 @@
         {
             "name": "Finance Gateway",
             "description": "Finance Gateway"
+        },
+        {
+            "name": "Partners - Suppliers",
+            "description": "Partners - Suppliers"
+        },
+        {
+            "name": "Transactions",
+            "description": "Transactions"
         }
     ]
 }

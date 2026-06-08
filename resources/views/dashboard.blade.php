@@ -55,13 +55,27 @@
                 const suppliers = supRes.data.data;
                 const customers = custRes.data.data;
 
-                // Update Stock In/Out
+                // Update Stock In/Out (totals & per-month)
                 let stockIn = 0;
                 let stockOut = 0;
+                const monthlyIn = new Array(12).fill(0);
+                const monthlyOut = new Array(12).fill(0);
+                const currentYear = new Date().getFullYear();
+
                 transactions.forEach(tx => {
                     if (tx.status === 'completed') {
-                        if (tx.type === 'in') stockIn += tx.quantity;
-                        else stockOut += tx.quantity;
+                        const txDate = new Date(tx.updated_at || tx.created_at);
+                        if (tx.type === 'in') {
+                            stockIn += tx.quantity;
+                            if (txDate.getFullYear() === currentYear) {
+                                monthlyIn[txDate.getMonth()] += tx.quantity;
+                            }
+                        } else {
+                            stockOut += tx.quantity;
+                            if (txDate.getFullYear() === currentYear) {
+                                monthlyOut[txDate.getMonth()] += tx.quantity;
+                            }
+                        }
                     }
                 });
 
@@ -69,9 +83,9 @@
                 document.getElementById('stat-stock-out').textContent = stockOut;
                 document.getElementById('stat-partners').textContent = (suppliers.length + customers.length);
 
-                // Update Charts with actual data
+                // Update Charts with monthly data
                 if (typeof updateCharts === 'function') {
-                    updateCharts(stockIn, stockOut);
+                    updateCharts(monthlyIn, monthlyOut);
                 }
 
             } catch (error) {

@@ -11,23 +11,20 @@ function initCharts() {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 datasets: [
                     {
-                        label: 'Sold',
-                        data: monthlySoldData,
-                        backgroundColor: (ctx) => ctx.dataIndex === activeMonthIndex ? '#9A82EA' : '#D3C6F9',
-                        borderRadius: {bottomLeft: 6, bottomRight: 6, topLeft: 0, topRight: 0},
-                        barPercentage: 0.5,
-                        stack: 'Stack 0',
+                        label: 'Inbound',
+                        data: monthlyEmptyData,
+                        backgroundColor: (ctx) => ctx.dataIndex === activeMonthIndex ? '#7c3aed' : '#c4b5fd',
+                        borderRadius: {topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0},
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.75,
                     },
                     {
-                        label: 'Remaining',
-                        data: monthlyEmptyData,
-                        backgroundColor: 'transparent',
-                        borderColor: (ctx) => ctx.dataIndex === activeMonthIndex ? '#9A82EA' : '#D3C6F9',
-                        borderWidth: {top: 1, right: 1, bottom: 0, left: 1},
-                        borderDash: [3, 3],
+                        label: 'Outbound',
+                        data: monthlySoldData,
+                        backgroundColor: (ctx) => ctx.dataIndex === activeMonthIndex ? '#a78bfa' : '#ede9fe',
                         borderRadius: {topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0},
-                        barPercentage: 0.5,
-                        stack: 'Stack 0',
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.75,
                     }
                 ]
             },
@@ -56,19 +53,16 @@ function initCharts() {
                                 return `Bulan: ${tooltipItems[0].label}`;
                             },
                             label: function(context) {
-                                if (context.datasetIndex === 0) {
-                                    const val = context.raw;
-                                    if (val === 0) return 'Belum ada data penjualan';
-                                    return `Total Terjual: ${val} Unit`;
-                                }
-                                return null;
+                                const val = context.raw;
+                                const label = context.dataset.label;
+                                return `${label}: ${val} Unit`;
                             }
                         }
                     }
                 },
                 scales: {
-                    x: { stacked: true, grid: { display: false }, border: { display: false }, ticks: { color: '#9CA3AF', font: { size: 11, family: 'Inter' } } },
-                    y: { stacked: true, display: false, grid: { display: false } }
+                    x: { stacked: false, grid: { display: false }, border: { display: false }, ticks: { color: '#9CA3AF', font: { size: 11, family: 'Inter' } } },
+                    y: { stacked: false, display: false, grid: { display: false } }
                 }
             }
         });
@@ -121,41 +115,41 @@ function initCharts() {
     }
 }
 
-function updateCharts(inData, outData) {
+function updateCharts(monthlyInData, monthlyOutData) {
     if (!window.barChartInstance) return;
 
-    // Use actual data for the current month (June = index 5)
-    const currentMonthIndex = 5;
-    monthlySoldData[currentMonthIndex] = outData;
-    monthlyEmptyData[currentMonthIndex] = inData;
+    // Replace all monthly data with actual data
+    for (let i = 0; i < 12; i++) {
+        monthlySoldData[i] = monthlyOutData[i] || 0;
+        monthlyEmptyData[i] = monthlyInData[i] || 0;
+    }
 
-    window.barChartInstance.data.datasets[0].data = monthlySoldData;
-    window.barChartInstance.data.datasets[1].data = monthlyEmptyData;
-    
-    // Also update regional data for current month
-    regionMonthlyData[currentMonthIndex] = [
-        Math.round(outData * 0.45),
-        Math.round(outData * 0.35),
-        Math.round(outData * 0.20)
-    ];
+    window.barChartInstance.data.datasets[0].data = monthlyEmptyData;
+    window.barChartInstance.data.datasets[1].data = monthlySoldData;
+
+    // Update regional data proportionally for each month
+    for (let i = 0; i < 12; i++) {
+        const out = monthlyOutData[i] || 0;
+        regionMonthlyData[i] = [
+            Math.round(out * 0.45),
+            Math.round(out * 0.35),
+            Math.round(out * 0.20)
+        ];
+    }
 
     window.barChartInstance.update();
+
+    // Show current month by default
+    const currentMonthIndex = new Date().getMonth();
     updateDoughnutForMonth(currentMonthIndex);
 }
 
-// Initial monthly data
-const monthlySoldData = [40, 55, 45, 30, 45, 0, 0, 0, 0, 0, 0, 0];
-const monthlyEmptyData = [20, 25, 20, 15, 20, 0, 0, 0, 0, 0, 0, 0];
-const regionMonthlyData = [
-    [40, 20, 15], // Jan
-    [55, 30, 25], // Feb
-    [45, 25, 20], // Mar
-    [30, 15, 10], // Apr
-    [45, 20, 18], // May
-    [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]
-];
+// Initial monthly data (will be replaced by actual data)
+const monthlySoldData = new Array(12).fill(0);
+const monthlyEmptyData = new Array(12).fill(0);
+const regionMonthlyData = Array.from({length: 12}, () => [0, 0, 0]);
 
-let activeMonthIndex = 4; // May (index 4) is active by default
+let activeMonthIndex = new Date().getMonth();
 
 function updateDoughnutForMonth(index) {
     if (!window.doughnutChartInstance) return;

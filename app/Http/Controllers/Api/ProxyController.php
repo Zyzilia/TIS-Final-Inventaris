@@ -14,8 +14,49 @@ class ProxyController extends Controller
         path: '/api/proxy/areas',
         operationId: 'searchAreas',
         summary: 'Cari Area Biteship (Kecamatan/Kodepos)',
+        description: 'Mencari area di Indonesia menggunakan Biteship API berdasarkan nama kecamatan atau kode pos (min 3 karakter). Memerlukan hak akses Admin atau Staff.',
         security: [['bearerAuth' => []]],
-        tags: ['Logistics Gateway']
+        tags: ['Logistics Gateway'],
+        parameters: [
+            new OA\Parameter(
+                name: 'q',
+                in: 'query',
+                required: true,
+                description: 'Nama kecamatan atau kode pos',
+                schema: new OA\Schema(type: 'string', minLength: 3, example: 'Mampang')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Berhasil melakukan pencarian area',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'array',
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: 'id', type: 'string', example: 'ID-12345'),
+                                    new OA\Property(property: 'name', type: 'string', example: 'Mampang Prapatan'),
+                                    new OA\Property(property: 'postal_code', type: 'integer', example: 12790),
+                                    new OA\Property(property: 'country', type: 'string', example: 'ID')
+                                ]
+                            )
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthorized - Token JWT tidak valid atau kadaluwarsa'
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Gagal mencari area karena kendala gateway api'
+            )
+        ]
     )]
     public function searchAreas(Request $request)
     {
@@ -49,22 +90,74 @@ class ProxyController extends Controller
     #[OA\Post(
         path: '/api/proxy/shipping-cost',
         operationId: 'checkShipping',
-        summary: 'Cek ongkir via RajaOngkir Proxy',
+        summary: 'Cek ongkir via Biteship Proxy',
+        description: 'Mendapatkan tarif pengiriman berdasarkan asal, tujuan, berat, dan kurir melalui Biteship API yang diformat menyerupai RajaOngkir. Memerlukan hak akses Admin atau Staff.',
         security: [['bearerAuth' => []]],
         tags: ['Logistics Gateway'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
+                required: ['origin', 'destination', 'weight', 'courier'],
                 properties: [
-                    new OA\Property(property: 'origin', type: 'string', example: '501'),
-                    new OA\Property(property: 'destination', type: 'string', example: '114'),
-                    new OA\Property(property: 'weight', type: 'integer', example: 1000),
-                    new OA\Property(property: 'courier', type: 'string', example: 'jne')
+                    new OA\Property(property: 'origin', type: 'string', description: 'ID Area Biteship Asal', example: '501'),
+                    new OA\Property(property: 'destination', type: 'string', description: 'ID Area Biteship Tujuan', example: '114'),
+                    new OA\Property(property: 'weight', type: 'integer', description: 'Berat barang dalam gram', example: 1000),
+                    new OA\Property(property: 'courier', type: 'string', description: 'Kode kurir (misal: jne, sicepat, jnt)', example: 'jne')
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Success')
+            new OA\Response(
+                response: 200,
+                description: 'Berhasil melakukan kalkulasi ongkos kirim',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Kalkulasi biaya pengiriman berhasil via Biteship'),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'array',
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: 'name', type: 'string', example: 'JNE'),
+                                    new OA\Property(
+                                        property: 'costs',
+                                        type: 'array',
+                                        items: new OA\Items(
+                                            properties: [
+                                                new OA\Property(property: 'service', type: 'string', example: 'REG'),
+                                                new OA\Property(property: 'description', type: 'string', example: 'Layanan Reguler'),
+                                                new OA\Property(
+                                                    property: 'cost',
+                                                    type: 'array',
+                                                    items: new OA\Items(
+                                                        properties: [
+                                                            new OA\Property(property: 'value', type: 'integer', example: 12000),
+                                                            new OA\Property(property: 'etd', type: 'string', example: '1-2 hari')
+                                                        ]
+                                                    )
+                                                )
+                                            ]
+                                        )
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthorized - Token JWT tidak valid atau kadaluwarsa'
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Validasi parameter input gagal'
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Terjadi kesalahan kalkulasi pada server gateway'
+            )
         ]
     )]
     public function checkCost(Request $request)
@@ -151,12 +244,46 @@ class ProxyController extends Controller
     #[OA\Get(
         path: '/api/proxy/currency-rates',
         operationId: 'getCurrencyRates',
-        summary: 'Ambil kurs mata uang asing (USD ke IDR) untuk import parts',
+        summary: 'Ambil kurs mata uang asing (USD ke IDR)',
+        description: 'Mendapatkan kurs konversi mata uang asing real-time (USD, SGD, CNY ke IDR) untuk kebutuhan impor barang/komponen. Memerlukan hak akses Admin atau Staff.',
         security: [['bearerAuth' => []]],
         tags: ['Finance Gateway'],
         responses: [
-            new OA\Response(response: 200, description: 'Berhasil mengambil kurs'),
-            new OA\Response(response: 500, description: 'Kesalahan Server')
+            new OA\Response(
+                response: 200,
+                description: 'Kurs berhasil diambil',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Kurs berhasil diambil'),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'object',
+                            properties: [
+                                new OA\Property(property: 'base', type: 'string', example: 'USD'),
+                                new OA\Property(
+                                    property: 'rates',
+                                    type: 'object',
+                                    properties: [
+                                        new OA\Property(property: 'IDR', type: 'number', example: 16250.5),
+                                        new OA\Property(property: 'SGD', type: 'number', example: 1.35),
+                                        new OA\Property(property: 'CNY', type: 'number', example: 7.24)
+                                    ]
+                                ),
+                                new OA\Property(property: 'last_updated', type: 'string', example: 'Mon, 08 Jun 2026 00:00:00 +0000')
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Unauthorized'
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Terjadi kesalahan pada server currency gateway'
+            )
         ]
     )]
     public function getCurrencyRates()

@@ -6,21 +6,43 @@ use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes as OA;
 
 class SupplierController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/api/suppliers",
-     *     operationId="getSupplierList",
-     *     summary="Ambil daftar supplier beserta kategori komponen yang dipasok",
-     *     security={{"bearerAuth":{}}},
-     *     tags={"Partners"},
-     *     @OA\Response(response=200, description="Berhasil mengambil data supplier"),
-     *     @OA\Response(response=401, description="Unauthorized")
-     * )
-     */
+    #[OA\Get(
+        path: '/api/suppliers',
+        operationId: 'getSupplierList',
+        summary: 'Ambil daftar supplier beserta kategori komponen yang dipasok',
+        description: 'Mendapatkan seluruh daftar supplier/partner pemasok barang beserta kategori komponen yang mereka pasok. Memerlukan hak akses Admin atau Staff.',
+        security: [['bearerAuth' => []]],
+        tags: ['Partners - Suppliers'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Berhasil mengambil data supplier',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'array',
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: 'id', type: 'integer', example: 1),
+                                    new OA\Property(property: 'name', type: 'string', example: 'Gigabyte Technology'),
+                                    new OA\Property(property: 'address', type: 'string', example: 'New Taipei City, Taiwan'),
+                                    new OA\Property(property: 'phone', type: 'string', example: '+886-2-8912-4000'),
+                                    new OA\Property(property: 'category', type: 'string', example: 'Motherboard & GPU')
+                                ]
+                            )
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthorized')
+        ]
+    )]
     public function index()
     {
         $suppliers = Supplier::with('items.category')->get()->map(function ($supplier) {
@@ -67,27 +89,51 @@ class SupplierController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/suppliers",
-     *     operationId="storeSupplier",
-     *     summary="Tambah supplier baru",
-     *     security={{"bearerAuth":{}}},
-     *     tags={"Partners"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"name", "address", "phone"},
-     *             @OA\Property(property="name", type="string", example="Gigabyte Technology"),
-     *             @OA\Property(property="address", type="string", example="New Taipei City, Taiwan"),
-     *             @OA\Property(property="phone", type="string", example="+886-2-8912-4000")
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Supplier berhasil ditambahkan"),
-     *     @OA\Response(response=422, description="Validasi input gagal"),
-     *     @OA\Response(response=401, description="Unauthorized")
-     * )
-     */
+    #[OA\Post(
+        path: '/api/suppliers',
+        operationId: 'storeSupplier',
+        summary: 'Tambah supplier baru',
+        description: 'Menambahkan data supplier baru ke dalam database. Memerlukan hak akses Admin.',
+        security: [['bearerAuth' => []]],
+        tags: ['Partners - Suppliers'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name', 'address', 'phone'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Gigabyte Technology'),
+                    new OA\Property(property: 'address', type: 'string', example: 'New Taipei City, Taiwan'),
+                    new OA\Property(property: 'phone', type: 'string', example: '+886-2-8912-4000')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Supplier berhasil ditambahkan',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Supplier berhasil ditambahkan'),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'object',
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 1),
+                                new OA\Property(property: 'name', type: 'string', example: 'Gigabyte Technology'),
+                                new OA\Property(property: 'address', type: 'string', example: 'New Taipei City, Taiwan'),
+                                new OA\Property(property: 'phone', type: 'string', example: '+886-2-8912-4000'),
+                                new OA\Property(property: 'category', type: 'string', example: 'General')
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(response: 403, description: 'Forbidden - Hanya untuk Admin'),
+            new OA\Response(response: 422, description: 'Validasi input gagal')
+        ]
+    )]
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -119,6 +165,59 @@ class SupplierController extends Controller
         ], 201);
     }
 
+    #[OA\Put(
+        path: '/api/suppliers/{id}',
+        operationId: 'updateSupplier',
+        summary: 'Update data supplier',
+        description: 'Memperbarui data supplier berdasarkan ID. Memerlukan hak akses Admin.',
+        security: [['bearerAuth' => []]],
+        tags: ['Partners - Suppliers'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                required: true,
+                description: 'ID Supplier',
+                schema: new OA\Schema(type: 'integer', example: 1)
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', example: 'Gigabyte Tech Co Ltd'),
+                    new OA\Property(property: 'address', type: 'string', example: 'Taipei, Taiwan'),
+                    new OA\Property(property: 'phone', type: 'string', example: '+886-2-8912-4001')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Supplier berhasil diperbarui',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Supplier berhasil diperbarui'),
+                        new OA\Property(
+                            property: 'data',
+                            type: 'object',
+                            properties: [
+                                new OA\Property(property: 'id', type: 'integer', example: 1),
+                                new OA\Property(property: 'name', type: 'string', example: 'Gigabyte Tech Co Ltd'),
+                                new OA\Property(property: 'address', type: 'string', example: 'Taipei, Taiwan'),
+                                new OA\Property(property: 'phone', type: 'string', example: '+886-2-8912-4001')
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(response: 403, description: 'Forbidden - Hanya untuk Admin'),
+            new OA\Response(response: 404, description: 'Supplier tidak ditemukan'),
+            new OA\Response(response: 422, description: 'Validasi update gagal')
+        ]
+    )]
     public function update(Request $request, string $id)
     {
         $supplier = Supplier::find($id);
@@ -153,6 +252,38 @@ class SupplierController extends Controller
         ], 200);
     }
 
+    #[OA\Delete(
+        path: '/api/suppliers/{id}',
+        operationId: 'deleteSupplier',
+        summary: 'Hapus supplier',
+        description: 'Menghapus data supplier dari database berdasarkan ID. Memerlukan hak akses Admin.',
+        security: [['bearerAuth' => []]],
+        tags: ['Partners - Suppliers'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'path',
+                required: true,
+                description: 'ID Supplier',
+                schema: new OA\Schema(type: 'integer', example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Supplier berhasil dihapus',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Supplier berhasil dihapus')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthorized'),
+            new OA\Response(response: 403, description: 'Forbidden - Hanya untuk Admin'),
+            new OA\Response(response: 404, description: 'Supplier tidak ditemukan')
+        ]
+    )]
     public function destroy(string $id)
     {
         $supplier = Supplier::find($id);
