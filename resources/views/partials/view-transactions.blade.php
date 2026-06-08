@@ -6,7 +6,7 @@
             <p class="text-gray-500 font-medium mt-1">History of stock movements and shipments</p>
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="openTxModal()" class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-700 transition shadow-lg shadow-primary-500/20 flex items-center gap-2">
+            <button onclick="openTxModal()" id="btnAddTransaction" class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-700 transition shadow-lg shadow-primary-500/20 flex items-center gap-2">
                 <i class="fa-solid fa-plus text-xs"></i> Add Transaction
             </button>
             @include('partials.header-actions')

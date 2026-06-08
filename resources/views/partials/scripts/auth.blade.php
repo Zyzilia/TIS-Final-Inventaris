@@ -21,6 +21,17 @@ if (!token) {
         document.querySelectorAll('.dropdownUserRole').forEach(el => {
             el.textContent = user.role === 'admin' ? 'Administrator' : 'Staff Gudang';
         });
+
+        // UI Restrictions based on Role
+        if (user.role !== 'admin') {
+            // Hide "Add New Item" buttons
+            const shelfAddBtn = document.getElementById('addShelfItemBtn');
+            if (shelfAddBtn) shelfAddBtn.style.display = 'none';
+
+            // Hide "Add Transaction" button
+            const txBtn = document.getElementById('btnAddTransaction');
+            if (txBtn) txBtn.style.display = 'none';
+        }
     }
 }
 

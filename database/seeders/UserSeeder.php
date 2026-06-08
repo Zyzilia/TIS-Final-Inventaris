@@ -22,5 +22,15 @@ class UserSeeder extends Seeder
                 'role' => 'admin',
             ]
         );
+
+        // Buat akun staff gudang
+        User::firstOrCreate(
+            ['email' => 'staff@inventaris.com'],
+            [
+                'name' => 'Staff Gudang',
+                'password' => Hash::make('password123'),
+                'role' => 'staff',
+            ]
+        );
     }
 }

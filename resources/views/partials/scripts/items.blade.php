@@ -55,6 +55,10 @@ async function loadItems() {
         const res = await axios.get('/api/items');
         currentItems = res.data.data;
         
+        // Update Stats
+        const totalItemsEl = document.getElementById('stat-total-items');
+        if (totalItemsEl) totalItemsEl.textContent = currentItems.length;
+
         renderCategorySalesSummary();
         if (selectedCategoryShelf) {
             renderShelfItems();
@@ -193,12 +197,18 @@ function openCategoryShelf(catId) {
     document.getElementById('warehouseShelfContainer').classList.remove('hidden');
     document.getElementById('warehouseShelfContainer').classList.add('flex');
 
-    const addBtn = document.getElementById('addShelfItemBtn');
-    addBtn.onclick = () => {
-        openItemModalWithCategory(catId);
-    };
-
     renderShelfItems();
+}
+
+function openItemModalForCurrentShelf() {
+    if (selectedCategoryShelf && typeof openItemModalWithCategory === 'function') {
+        openItemModalWithCategory(selectedCategoryShelf);
+    } else {
+        // Fallback to general modal if no shelf selected or function missing
+        if (typeof openItemModal === 'function') {
+            openItemModal();
+        }
+    }
 }
 
 function backToWarehouseGrid() {
@@ -207,12 +217,6 @@ function backToWarehouseGrid() {
     document.getElementById('warehouseShelfContainer').classList.remove('flex');
     document.getElementById('warehouseGridContainer').classList.remove('hidden');
     loadCategoriesGrid();
-}
-
-function openItemModalWithCategory(catId) {
-    openItemModal();
-    const catSelect = document.getElementById('itemCategory');
-    catSelect.value = catId;
 }
 
 function renderShelfItems() {
@@ -237,6 +241,17 @@ function renderShelfItems() {
 
     shelfItems.forEach(item => {
         let basePriceIDR = item.price / (1 + (item.profit_margin / 100));
+        
+        // Check for admin role to show/hide actions
+        const userStr = localStorage.getItem('user_data');
+        const user = userStr ? JSON.parse(userStr) : null;
+        const isAdmin = user && user.role === 'admin';
+
+        const actionButtons = isAdmin ? `
+            <button onclick="openItemModal(${item.id})" class="text-primary-600 hover:text-white bg-white hover:bg-primary-600 border border-gray-200 hover:border-primary-600 w-8 h-8 rounded-lg shadow-sm transition-all" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button onclick="confirmDelete(${item.id})" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-gray-200 hover:border-red-500 w-8 h-8 rounded-lg shadow-sm transition-all" title="Delete Item"><i class="fa-solid fa-trash text-xs"></i></button>
+        ` : `<span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Locked</span>`;
+
         tbody.innerHTML += `
             <tr class="border-b border-gray-50 hover:bg-primary-50/30 transition-colors group">
                 <td class="py-4 px-8">
@@ -251,8 +266,7 @@ function renderShelfItems() {
                 <td class="py-4 px-4"><span class="text-green-600 font-extrabold bg-green-50 px-2 py-0.5 rounded-lg border border-green-100 text-[10px]">+${item.profit_margin}%</span></td>
                 <td class="py-4 px-4 font-extrabold text-primary-600">Rp ${Number(item.price).toLocaleString('id-ID', {maximumFractionDigits: 0})}</td>
                 <td class="py-4 px-8 text-right space-x-2">
-                    <button onclick="openItemModal(${item.id})" class="text-primary-600 hover:text-white bg-white hover:bg-primary-600 border border-gray-200 hover:border-primary-600 w-8 h-8 rounded-lg shadow-sm transition-all" title="Edit Item"><i class="fa-solid fa-pen text-xs"></i></button>
-                    <button onclick="confirmDelete(${item.id})" class="text-red-500 hover:text-white bg-white hover:bg-red-500 border border-gray-200 hover:border-red-500 w-8 h-8 rounded-lg shadow-sm transition-all" title="Delete Item"><i class="fa-solid fa-trash text-xs"></i></button>
+                    ${actionButtons}
                 </td>
             </tr>
         `;

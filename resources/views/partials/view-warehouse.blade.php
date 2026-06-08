@@ -26,7 +26,7 @@
                 <p class="text-gray-500 font-medium mt-1" id="shelfSubtitle">Manage items and stock levels in this category</p>
             </div>
             <div class="flex gap-3">
-                <button id="addShelfItemBtn" class="bg-primary-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-primary-700 transition shadow-lg shadow-primary-500/20 flex items-center gap-2">
+                <button id="addShelfItemBtn" onclick="openItemModalForCurrentShelf()" class="bg-primary-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-primary-700 transition shadow-lg shadow-primary-500/20 flex items-center gap-2">
                     <i class="fa-solid fa-plus text-xs"></i> Add New Item
                 </button>
                 @include('partials.header-actions')

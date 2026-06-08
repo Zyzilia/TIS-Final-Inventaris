@@ -39,9 +39,44 @@
 
         @include('partials.scripts.modals')
 
-        function loadDashboardData() {
+        async function loadDashboardData() {
             loadItems();
             loadActivities();
+            
+            // Update additional stats
+            try {
+                const [txRes, supRes, custRes] = await Promise.all([
+                    axios.get('/api/transactions'),
+                    axios.get('/api/suppliers'),
+                    axios.get('/api/customers')
+                ]);
+
+                const transactions = txRes.data.data;
+                const suppliers = supRes.data.data;
+                const customers = custRes.data.data;
+
+                // Update Stock In/Out
+                let stockIn = 0;
+                let stockOut = 0;
+                transactions.forEach(tx => {
+                    if (tx.status === 'completed') {
+                        if (tx.type === 'in') stockIn += tx.quantity;
+                        else stockOut += tx.quantity;
+                    }
+                });
+
+                document.getElementById('stat-stock-in').textContent = stockIn;
+                document.getElementById('stat-stock-out').textContent = stockOut;
+                document.getElementById('stat-partners').textContent = (suppliers.length + customers.length);
+
+                // Update Charts with actual data
+                if (typeof updateCharts === 'function') {
+                    updateCharts(stockIn, stockOut);
+                }
+
+            } catch (error) {
+                console.error('Failed to load dashboard stats:', error);
+            }
         }
         loadDashboardData();
     </script>

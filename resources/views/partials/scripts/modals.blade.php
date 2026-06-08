@@ -32,152 +32,195 @@ function handleBrandSelectChange() {
 }
 
 // Settings Modal Logic
-const settingsModal = document.getElementById('settingsModal');
+function getSettingsModal() { return document.getElementById('settingsModal'); }
 
 function loadSettings() {
     const defaultMargin = localStorage.getItem('settings_default_margin') || '10';
     const useManualRate = localStorage.getItem('settings_use_manual_rate') === 'true';
     const manualRate = localStorage.getItem('settings_manual_rate') || '16200';
 
-    document.getElementById('settingsDefaultMargin').value = defaultMargin;
-    document.getElementById('settingsUseManualRate').checked = useManualRate;
-    document.getElementById('settingsManualRate').value = manualRate;
+    const marginEl = document.getElementById('settingsDefaultMargin');
+    const useRateEl = document.getElementById('settingsUseManualRate');
+    const rateEl = document.getElementById('settingsManualRate');
+
+    if(marginEl) marginEl.value = defaultMargin;
+    if(useRateEl) useRateEl.checked = useManualRate;
+    if(rateEl) rateEl.value = manualRate;
 
     toggleManualRateInput();
 }
 
 function toggleManualRateInput() {
-    const checked = document.getElementById('settingsUseManualRate').checked;
+    const checkEl = document.getElementById('settingsUseManualRate');
+    if(!checkEl) return;
+    const checked = checkEl.checked;
     const wrapper = document.getElementById('settingsManualRateWrapper');
     if (checked) {
-        wrapper.classList.remove('hidden');
+        if(wrapper) wrapper.classList.remove('hidden');
         document.getElementById('settingsManualRate').required = true;
     } else {
-        wrapper.classList.add('hidden');
+        if(wrapper) wrapper.classList.add('hidden');
         document.getElementById('settingsManualRate').required = false;
     }
 }
 
 function openSettingsModal() {
     loadSettings();
-    settingsModal.classList.remove('hidden');
-    settingsModal.classList.add('flex');
+    const modal = getSettingsModal();
+    if(modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 }
 
 function closeSettingsModal() {
-    settingsModal.classList.add('hidden');
-    settingsModal.classList.remove('flex');
-}
-
-function saveSettings(e) {
-    e.preventDefault();
-    const defaultMargin = document.getElementById('settingsDefaultMargin').value;
-    const useManualRate = document.getElementById('settingsUseManualRate').checked;
-    const manualRate = document.getElementById('settingsManualRate').value;
-
-    localStorage.setItem('settings_default_margin', defaultMargin);
-    localStorage.setItem('settings_use_manual_rate', useManualRate);
-    localStorage.setItem('settings_manual_rate', manualRate);
-
-    closeSettingsModal();
-    fetchExchangeRate();
-    loadItems();
-    alert('Pengaturan berhasil disimpan!');
+    const modal = getSettingsModal();
+    if(modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 }
 
 // Item Modal Logic
-const itemModal = document.getElementById('itemModal');
-const itemForm = document.getElementById('itemForm');
+function getItemModal() { return document.getElementById('itemModal'); }
+function getItemForm() { return document.getElementById('itemForm'); }
 
 function openItemModal(id = null) {
-    itemForm.reset();
-    document.getElementById('itemId').value = '';
-    document.getElementById('modalTitle').textContent = 'Add New Item';
+    const form = getItemForm();
+    if(form) form.reset();
+    
+    const idEl = document.getElementById('itemId');
+    const titleEl = document.getElementById('modalTitle');
+    const catEl = document.getElementById('itemCategory');
+    const marginEl = document.getElementById('itemMargin');
+
+    if(idEl) idEl.value = '';
+    if(titleEl) titleEl.textContent = 'Add New Item';
     
     // Set default category
-    document.getElementById('itemCategory').value = 1;
+    if(catEl) catEl.value = 1;
     updateBrandOptions();
 
     const defaultMargin = localStorage.getItem('settings_default_margin') || '10';
-    document.getElementById('itemMargin').value = defaultMargin;
+    if(marginEl) marginEl.value = defaultMargin;
     
     if(id) {
         const item = currentItems.find(i => i.id === id);
         if(item) {
-            document.getElementById('modalTitle').textContent = 'Edit Item';
-            document.getElementById('itemId').value = item.id;
-            document.getElementById('itemName').value = item.name;
-            document.getElementById('itemCategory').value = item.category_id || 1;
+            if(titleEl) titleEl.textContent = 'Edit Item';
+            if(idEl) idEl.value = item.id;
+            const nameEl = document.getElementById('itemName');
+            if(nameEl) nameEl.value = item.name;
+            if(catEl) catEl.value = item.category_id || 1;
             
             // Update brand options based on edit item's category
             updateBrandOptions();
 
             // Check if item's brand is in standard options
             const standardBrands = categoryBrands[item.category_id || 1] || [];
-            if (item.brand && standardBrands.includes(item.brand) && item.brand !== 'Lainnya (Ketik Manual)') {
-                document.getElementById('itemBrandSelect').value = item.brand;
-                handleBrandSelectChange();
-            } else if (item.brand) {
-                document.getElementById('itemBrandSelect').value = 'Lainnya (Ketik Manual)';
-                handleBrandSelectChange();
-                document.getElementById('itemBrandCustom').value = item.brand;
+            const brandSelectEl = document.getElementById('itemBrandSelect');
+            if (brandSelectEl) {
+                if (item.brand && standardBrands.includes(item.brand) && item.brand !== 'Lainnya (Ketik Manual)') {
+                    brandSelectEl.value = item.brand;
+                    handleBrandSelectChange();
+                } else if (item.brand) {
+                    brandSelectEl.value = 'Lainnya (Ketik Manual)';
+                    handleBrandSelectChange();
+                    const customBrandEl = document.getElementById('itemBrandCustom');
+                    if(customBrandEl) customBrandEl.value = item.brand;
+                }
             }
 
-            document.getElementById('itemSku').value = item.sku;
-            document.getElementById('itemStock').value = item.stock;
-            document.getElementById('itemPriceUsd').value = item.price_usd;
-            document.getElementById('itemMargin').value = item.profit_margin;
-            document.getElementById('itemWeight').value = item.weight || 1000;
+            const skuEl = document.getElementById('itemSku');
+            if(skuEl) skuEl.value = item.sku;
+            const stockEl = document.getElementById('itemStock');
+            if(stockEl) stockEl.value = item.stock;
+            const priceEl = document.getElementById('itemPriceUsd');
+            if(priceEl) priceEl.value = item.price_usd;
+            if(marginEl) marginEl.value = item.profit_margin;
+            const weightEl = document.getElementById('itemWeight');
+            if(weightEl) weightEl.value = item.weight || 1000;
         }
     }
-    itemModal.classList.remove('hidden');
-    itemModal.classList.add('flex');
+    const modal = getItemModal();
+    if(modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function openItemModalWithCategory(catId) {
+    openItemModal();
+    const catSelect = document.getElementById('itemCategory');
+    if (catSelect) {
+        catSelect.value = catId;
+        updateBrandOptions();
+    }
 }
 
 function closeItemModal() {
-    itemModal.classList.add('hidden');
-    itemModal.classList.remove('flex');
+    const modal = getItemModal();
+    if(modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 }
 
-itemForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('saveItemBtn');
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
-    btn.disabled = true;
-
-    const id = document.getElementById('itemId').value;
-    
-    let brandVal = document.getElementById('itemBrandSelect').value;
-    if (brandVal === 'Lainnya (Ketik Manual)') {
-        brandVal = document.getElementById('itemBrandCustom').value;
-    }
-
-    const data = {
-        category_id: document.getElementById('itemCategory').value,
-        brand: brandVal,
-        name: document.getElementById('itemName').value,
-        sku: document.getElementById('itemSku').value,
-        stock: document.getElementById('itemStock').value,
-        price_usd: document.getElementById('itemPriceUsd').value,
-        profit_margin: document.getElementById('itemMargin').value,
-        weight: document.getElementById('itemWeight').value,
-    };
-
-    try {
-        if (id) {
-            await axios.put(`/api/items/${id}`, data);
-        } else {
-            await axios.post('/api/items', data);
+const itemFormElem = document.getElementById('itemForm');
+if(itemFormElem) {
+    itemFormElem.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('saveItemBtn');
+        if(btn) {
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+            btn.disabled = true;
         }
-        closeItemModal();
-        loadDashboardData();
-    } catch (error) {
-        alert(error.response?.data?.message || 'Failed to save item');
-    } finally {
-        btn.innerHTML = 'Save Item';
-        btn.disabled = false;
-    }
-});
+
+        const id = document.getElementById('itemId').value;
+        
+        const brandSelectEl = document.getElementById('itemBrandSelect');
+        let brandVal = brandSelectEl ? brandSelectEl.value : '';
+        if (brandVal === 'Lainnya (Ketik Manual)') {
+            const customBrandEl = document.getElementById('itemBrandCustom');
+            brandVal = customBrandEl ? customBrandEl.value : '';
+        }
+
+        const data = {
+            category_id: document.getElementById('itemCategory').value,
+            brand: brandVal,
+            name: document.getElementById('itemName').value,
+            sku: document.getElementById('itemSku').value,
+            stock: document.getElementById('itemStock').value,
+            price_usd: document.getElementById('itemPriceUsd').value,
+            profit_margin: document.getElementById('itemMargin').value,
+            weight: document.getElementById('itemWeight').value,
+        };
+
+        try {
+            if (id) {
+                await axios.put(`/api/items/${id}`, data);
+            } else {
+                await axios.post('/api/items', data);
+            }
+            closeItemModal();
+            
+            // Refresh data
+            if (typeof loadDashboardData === 'function') await loadDashboardData();
+            
+            // If in warehouse shelf view, refresh the shelf items
+            if (typeof renderShelfItems === 'function' && selectedCategoryShelf) {
+                renderShelfItems();
+            }
+        } catch (error) {
+            alert(error.response?.data?.message || 'Failed to save item');
+        } finally {
+            if(btn) {
+                btn.innerHTML = 'Save Item';
+                btn.disabled = false;
+            }
+        }
+    });
+}
 
 // Delete Modal Logic
 let itemToDelete = null;
