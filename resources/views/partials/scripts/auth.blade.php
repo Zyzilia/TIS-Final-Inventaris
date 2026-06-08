@@ -31,6 +31,10 @@ if (!token) {
             // Hide "Add Transaction" button
             const txBtn = document.getElementById('btnAddTransaction');
             if (txBtn) txBtn.style.display = 'none';
+
+            // Hide "Add Partner" button
+            const partnerBtn = document.getElementById('addPartnerBtn');
+            if (partnerBtn) partnerBtn.style.display = 'none';
         }
     }
 }

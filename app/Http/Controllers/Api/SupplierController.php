@@ -118,4 +118,57 @@ class SupplierController extends Controller
             ]
         ], 201);
     }
+
+    public function update(Request $request, string $id)
+    {
+        $supplier = Supplier::find($id);
+
+        if (!$supplier) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Supplier tidak ditemukan'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|max:255|unique:suppliers,name,' . $id,
+            'address' => 'string',
+            'phone' => 'string|max:50',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi update gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $supplier->update($request->all());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Supplier berhasil diperbarui',
+            'data' => $supplier
+        ], 200);
+    }
+
+    public function destroy(string $id)
+    {
+        $supplier = Supplier::find($id);
+
+        if (!$supplier) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Supplier tidak ditemukan'
+            ], 404);
+        }
+
+        $supplier->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Supplier berhasil dihapus'
+        ], 200);
+    }
 }

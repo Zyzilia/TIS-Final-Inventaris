@@ -46,6 +46,11 @@ function filterTransactions() {
         return;
     }
 
+    // Check for admin role to show/hide actions
+    const userStr = localStorage.getItem('user_data');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const isAdmin = user && user.role === 'admin';
+
     filtered.forEach(tx => {
         const dateStr = new Date(tx.created_at).toLocaleDateString('id-ID', {
             year: 'numeric',
@@ -65,12 +70,18 @@ function filterTransactions() {
             ? `<span class="bg-green-50 text-green-600 px-3 py-1 rounded-full text-[10px] font-bold border border-green-100 uppercase tracking-wider inline-flex items-center gap-1.5"><i class="fa-solid fa-check-double"></i> Completed</span>`
             : `<span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-[10px] font-bold border border-amber-100 uppercase tracking-wider inline-flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> Pending</span>`;
 
+        const actionBtn = isAdmin 
+            ? `<button onclick="openTxDetailModal(${tx.id})" class="text-primary-600 hover:text-white font-medium text-xs flex items-center justify-center bg-white hover:bg-primary-600 border border-gray-200 hover:border-primary-600 w-8 h-8 rounded-lg shadow-sm transition-all" title="View & Edit Details">
+                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                </button>`
+            : `<button onclick="openTxDetailModal(${tx.id})" class="text-gray-400 hover:text-white font-medium text-xs flex items-center justify-center bg-white hover:bg-gray-600 border border-gray-200 hover:border-gray-600 w-8 h-8 rounded-lg shadow-sm transition-all" title="View Details">
+                    <i class="fa-solid fa-eye text-xs"></i>
+                </button>`;
+
         const statusColumn = `
             <div class="flex items-center justify-end gap-3">
                 ${statusBadge}
-                <button onclick="openTxDetailModal(${tx.id})" class="text-primary-600 hover:text-white font-medium text-xs flex items-center justify-center bg-white hover:bg-primary-600 border border-gray-200 hover:border-primary-600 w-8 h-8 rounded-lg shadow-sm transition-all" title="View Details">
-                    <i class="fa-solid fa-eye text-xs"></i>
-                </button>
+                ${actionBtn}
             </div>
         `;
 
@@ -195,6 +206,20 @@ function openTxDetailModal(id) {
         
     document.getElementById('detailTxStatusSelect').value = tx.status;
     
+    // Role-based UI in Detail Modal
+    const userStr = localStorage.getItem('user_data');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const saveBtn = document.getElementById('saveTxDetailBtn');
+    const statusSelectContainer = document.getElementById('detailTxStatusSelect').closest('.space-y-1\\.5');
+    
+    if (user && user.role !== 'admin') {
+        if(saveBtn) saveBtn.style.display = 'none';
+        if(statusSelectContainer) statusSelectContainer.style.display = 'none';
+    } else {
+        if(saveBtn) saveBtn.style.display = 'block';
+        if(statusSelectContainer) statusSelectContainer.style.display = 'block';
+    }
+
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 }

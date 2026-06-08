@@ -259,6 +259,7 @@
             <button onclick="closePartnerModal()" class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
         <form id="partnerForm" onsubmit="submitPartner(event)" class="p-8 flex flex-col gap-5">
+            <input type="hidden" id="partnerId">
             <div class="space-y-1.5">
                 <label id="partnerNameLabel" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Partner Name</label>
                 <input type="text" id="partnerNameInput" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 transition-all font-bold text-gray-900">

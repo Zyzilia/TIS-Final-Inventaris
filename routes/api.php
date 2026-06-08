@@ -26,9 +26,18 @@ Route::middleware('auth:api')->group(function () {
         Route::put('items/{id}', [ItemController::class, 'update']);
         Route::delete('items/{id}', [ItemController::class, 'destroy']);
         
-        // Hanya Admin yang bisa menambah dan mengubah status transaksi
+        // Transaksi
         Route::post('transactions', [TransactionController::class, 'store']);
         Route::put('transactions/{id}', [TransactionController::class, 'update']);
+
+        // Partners (Suppliers & Customers)
+        Route::post('suppliers', [SupplierController::class, 'store']);
+        Route::put('suppliers/{id}', [SupplierController::class, 'update']);
+        Route::delete('suppliers/{id}', [SupplierController::class, 'destroy']);
+
+        Route::post('customers', [CustomerController::class, 'store']);
+        Route::put('customers/{id}', [CustomerController::class, 'update']);
+        Route::delete('customers/{id}', [CustomerController::class, 'destroy']);
     });
 
     // Hak Akses: ADMIN & STAFF GUDANG (Read Only)
@@ -38,9 +47,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('activities', [ActivityController::class, 'index']);
         Route::get('transactions', [TransactionController::class, 'index']);
         Route::get('suppliers', [SupplierController::class, 'index']);
-        Route::post('suppliers', [SupplierController::class, 'store']);
         Route::get('customers', [CustomerController::class, 'index']);
-        Route::post('customers', [CustomerController::class, 'store']);
 
         Route::prefix('proxy')->group(function () {
             Route::get('areas', [ProxyController::class, 'searchAreas']);
